@@ -1,8 +1,8 @@
 import copy
 
-from TCed.decision.politic import Politic
-from TCed.oms import OMS
-from TCed.base import Asset
+from .decision.politic import Politic
+from .oms import OMS
+from .base import Asset
 
 from evalutation.asset.postprocessor import Postprocessor
 from evalutation.reporting import Reporting

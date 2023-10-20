@@ -1,4 +1,4 @@
-from TCed.oms import OMS
+from .oms import OMS
 
 
 STATE = [
