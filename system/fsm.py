@@ -13,6 +13,7 @@ class FSM:
     def __init__(self, current_state, next_state, signal_action, risk_action, test_state):
         self.current_state = current_state
         self.next_state = next_state
+        
         self.signal_action = signal_action
         self.risk_action = risk_action
         self.oms = OMS(test = test_state)

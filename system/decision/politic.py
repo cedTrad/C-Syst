@@ -26,22 +26,36 @@ class Politic:
         
         
     def get_in(self, signal, current_asset_position):
-        if current_asset_position == 0 and signal is not None:
+        if signal == "LONG" and current_asset_position == 0:
+            return True
+        elif signal == "SHORT" and current_asset_position == 0:
             return True
         else:
             return False
 
     def get_out(self, signal, current_asset_position):
-        if current_asset_position == 1 and signal == "SHORT":
+        if signal is None and current_asset_position == 1:
             return True
-        elif current_asset_position == -1 and signal == "LONG":
+        elif signal is None and current_asset_position == -1:
             return True
+        elif signal == "LONG" and current_asset_position == -1:
+            return True
+        elif signal == "SHORT" and current_asset_position == 1:
+            return True
+        
         else:
             return False
         
+    def get_pass(self, signal, current_asset_position):
+        if signal == "LONG" and current_asset_position == 1:
+            return True
+        elif signal == "SHORT" and current_asset_position == -1:
+            return True
+        elif signal == "LONG" and current_asset_position == 0:
+            return True
+        
         
     def perform(self, data, portfolio, current_asset_position):
-        
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
         
         signal_action = {}
@@ -66,8 +80,7 @@ class Politic:
         
         else:
             signal_action.update({"state" : ("-", signal, sl, tp)})
-        
+        print(f" asset_position :  {current_asset_position}  .<->.  signal : {signal}")
         return signal_action, risk_action
-    
     
     

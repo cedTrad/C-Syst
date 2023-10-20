@@ -50,6 +50,7 @@ class Agent:
     def update(self, state):
         event = self.get_event()
         signal_action, risk_action = self.act(state)
+        print(f"{event.date} -- {signal_action}")
         next_state, reward = self.env.step(self.asset, event, signal_action, risk_action)
         return next_state, reward, event
     
@@ -78,6 +79,21 @@ class Agent:
                 self.post_trade(event=event, trades_data = trades_data, close_trade=True)
     
     
-    def report(self):
-        ""
+    def get_report(self):
+        self.report.get_trades_data(postindicator=self.postindicator, trades_data=self.trades_data,
+                                    portfolio_data=self.env.journal.portfolio_data)
+        
+        fig0 = self.report.benchmark(self.symbol)
+        fig0.show()
+        
+        fig = self.report.plot_asset(symbol=self.symbol)
+        fig.show()
+        
+        fig1 = self.report.plot_pnl(self.symbol)
+        fig1.show()
+        
+        fig2 = self.report.plot_portfolio()
+        fig2.show()
+        
+        
         

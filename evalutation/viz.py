@@ -1,5 +1,22 @@
 import numpy as np
-from plot import plot_candle, add_line, add_second_y, add_scatter, add_bar, subplots, signal_point, color_trades
+from plot import *
+
+
+class VizBenchmark:
+    
+    def __init__(self, trades):
+        self.trades = trades
+    
+    def show(self, symbol):
+        
+        trade = self.trades[symbol]["all"]
+        
+        fig = create_figure()
+        add_line(fig, trade, feature="price_cum", name="price")
+        add_line(fig, trade, feature="cum_rets", name="strategie")
+        
+        return fig
+    
 
 class VizAsset:
     
@@ -40,19 +57,55 @@ class VizAsset:
         return fig
 
 
-class Pnl:
+class VizPortfolio:
     
-    def __init__(self):
-        self.p = 0
-
-
-class Portfolio:
+    def __init__(self, portfolio_data):
+        self.portfolio = portfolio_data
     
-    def __init__(self):
-        self.p = 0
+    def show(self):
         
+        fig = create_figure()
         
-class Risk:
+        add_line(fig, data=self.portfolio, feature="capital", name="capital")
+        add_bar(fig, data=self.portfolio, feature="risk_value", name = "risk")
+        add_bar(fig, data=self.portfolio, feature="available_value", name = "available")
+        
+        fig.update_layout(height = 500 , width = 1000,
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0}
+                          )
+        
+        return fig 
+        
+
+class VizPnl:
+    
+    def __init__(self, trades_data):
+        self.data = trades_data
+    
+    def long_short(self, symbol):
+        fig = create_figure()
+        
+        data_long = self.data[symbol]["long"]
+        data_short = self.data[symbol]["short"]
+        
+        add_hist(fig, data_long, feature="rets", name="long")
+        add_hist(fig, data_short, feature="rets", name="short")
+        
+        add_vline(fig, x=0, color="black")
+        
+        fig.update_layout(height = 350 , width = 700,
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0}
+                          )
+        return fig
+
+          
+class VizRisk:
     
     def __init__(self):
         self.p = 0
