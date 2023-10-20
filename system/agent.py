@@ -50,7 +50,7 @@ class Agent:
     def update(self, state):
         event = self.get_event()
         signal_action, risk_action = self.act(state)
-        print(f"{event.date} -- {signal_action}")
+        print(f"{event.date} -- {signal_action}  = {risk_action}")
         next_state, reward = self.env.step(self.asset, event, signal_action, risk_action)
         return next_state, reward, event
     

@@ -16,18 +16,19 @@ class OrderTest:
             return quantity
         elif side == "SELL":
             return (-1)*quantity
+
     
     def open_long(self, asset, price, quantity):
         qty = self.place_order(asset.symbol, price, quantity, side = "BUY")
         asset.type = "LONG"
         asset.position = 1
-        asset.update(quantity = qty, price = price, state = ("Open", "LONG", "tp", "sl"))
+        asset.update(quantity = qty, price = price)
         #return asset
     
     def close_long(self, asset, price):
         qty = self.place_order(asset.symbol, price, quantity = asset.quantity, side = "SELL")
         asset.position = 0
-        asset.update(quantity = qty, price = price, state = ("Close", "LONG", "tp", "sl"))
+        asset.update(quantity = qty, price = price)
         asset.type = "None"
         #return asset
         
@@ -35,13 +36,13 @@ class OrderTest:
         qty = self.place_order(asset.symbol, price, quantity, side = "SELL")
         asset.type = "SHORT"
         asset.position = -1
-        asset.update(quantity = qty, price = price, state = ("Open", "SHORT", "tp", "sl"))
+        asset.update(quantity = qty, price = price)
         #return asset
     
     def close_short(self, asset, price):
         qty = self.place_order(asset.symbol, price, quantity = asset.quantity, side = "BUY")
         asset.position = 0
-        asset.update(quantity = qty, price = price, state = ("Close", "SHORT", "tp", "sl"))
+        asset.update(quantity = qty, price = price)
         asset.type = "None"
         #return asset
     
@@ -52,9 +53,6 @@ class OrderTest:
     def order_limit(self, asset, order):
         asset =  self.order.open_short(asset=asset, price=order["price"], quantity=order["quantity"])
         #return asset
-    
-    def pas(self, asset, price, state):
-        asset.update(quantity = qty, price = price, state = ("Close", "SHORT", "tp", "sl"))
     
     
 

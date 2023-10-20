@@ -20,6 +20,8 @@ class FSM:
         
         
     def actuator(self, portfolio, asset, price):
+        asset.get_state(state = self.signal_action["state"])
+        
         if self.signal_action["state"][:2] == ("Open", "LONG"):
             response = self.oms.order.open_long(asset, price, quantity = self.risk_action["quantity"])
             portfolio.rebalance(amount = self.risk_action["amount"])
@@ -27,6 +29,7 @@ class FSM:
         elif self.signal_action["state"][:2] == ("Close", "LONG"):
             response = self.oms.order.close_long(asset, price)
         
+        # --------------------------------------------------------   ---------
         elif self.signal_action["state"][:2] == ("Open", "SHORT"):
             response = self.oms.order.open_short(asset, price = price, quantity = self.risk_action["quantity"])
             portfolio.rebalance(amount = self.risk_action["amount"])
@@ -34,14 +37,16 @@ class FSM:
         elif self.signal_action["state"][:2] == ("Close", "SHORT"):
             response = self.oms.order.close_short(asset, price = price)
         
+        # --------------------------------------------------------   ---------
         elif self.signal_action["state"][:2] == ("Resize", "LONG"):
             "place_order()"
         
         elif self.signal_action["state"][:2] == ("Resize", "SHORT"):
             "place_order()"
         
+        # --------------------------------------------------------   ---------
         elif self.signal_action["state"][0] == "-":
-            asset.update(price = price, state = self.signal_action["state"])
+            asset.update(price = price)
             
     
     

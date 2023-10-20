@@ -2,12 +2,16 @@
 from .signal import Signal
 from .management import Management
 
+from .transition import Transition
+
+
 class Politic:
     
     def __init__(self, capital):
         self.capital = capital
         self.signal = Signal()
         self.management = Management(capital)
+        
     
     def signal_policy(self, signal):
         return signal
@@ -25,36 +29,6 @@ class Politic:
         return signal
         
         
-    def get_in(self, signal, current_asset_position):
-        if signal == "LONG" and current_asset_position == 0:
-            return True
-        elif signal == "SHORT" and current_asset_position == 0:
-            return True
-        else:
-            return False
-
-    def get_out(self, signal, current_asset_position):
-        if signal is None and current_asset_position == 1:
-            return True
-        elif signal is None and current_asset_position == -1:
-            return True
-        elif signal == "LONG" and current_asset_position == -1:
-            return True
-        elif signal == "SHORT" and current_asset_position == 1:
-            return True
-        
-        else:
-            return False
-        
-    def get_pass(self, signal, current_asset_position):
-        if signal == "LONG" and current_asset_position == 1:
-            return True
-        elif signal == "SHORT" and current_asset_position == -1:
-            return True
-        elif signal == "LONG" and current_asset_position == 0:
-            return True
-        
-        
     def perform(self, data, portfolio, current_asset_position):
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
         
@@ -67,7 +41,12 @@ class Politic:
         sl = False
         tp = False
         
-        if self.get_in(signal, current_asset_position):
+        open_state = Transition(signal, current_asset_position).get_in()
+        close_state = Transition(signal, current_asset_position).get_out()
+        skip = Transition(signal, current_asset_position).get_skip()
+    
+        
+        if open_state is not False:
             signal_action.update({"state" : ("Open", signal, sl, tp)})
             
             leverage = 1
@@ -75,8 +54,8 @@ class Politic:
             quantity = amount / price
             risk_action.update({"amount" : amount, "quantity" : quantity, "leverage" : leverage})
         
-        elif self.get_out(signal, current_asset_position):
-            signal_action.update({"state" : ("Close", signal, sl, tp)})
+        elif close_state is not False:
+            signal_action.update({"state" : (close_state) + (sl, tp)})
         
         else:
             signal_action.update({"state" : ("-", signal, sl, tp)})
