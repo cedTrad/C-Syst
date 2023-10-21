@@ -4,8 +4,9 @@ from plot import *
 
 class VizBenchmark:
     
-    def __init__(self, trades):
+    def __init__(self, trades, portfolio_data = ""):
         self.trades = trades
+        self.portfolio_data = portfolio_data
     
     def show(self, symbol):
         
@@ -17,6 +18,13 @@ class VizBenchmark:
         
         return fig
     
+    def per_trade(self):
+        ""
+        
+    
+    def all(self):
+        ""
+        
 
 class VizAsset:
     

@@ -59,7 +59,7 @@ class Politic:
         
         else:
             signal_action.update({"state" : ("-", signal, sl, tp)})
-        print(f" asset_position :  {current_asset_position}  .<->.  signal : {signal}")
+            
         return signal_action, risk_action
     
     

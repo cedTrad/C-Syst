@@ -16,10 +16,12 @@ class Asset:
         self.pnl = 0
         self.pnl_pct = 0
             
+            
     def get_pnl(self, price):
         if self.type == "SHORT":
             return self.in_value - abs(self.quantity * price)
         return abs(self.quantity * price) - self.in_value
+    
     
     def get_value(self, price):
         return self.in_value + self.get_pnl(price)
