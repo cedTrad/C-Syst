@@ -6,13 +6,14 @@ import ast
 class Processing:
     
     def add_trades_features(self, trades):
-        trades['value2'] = trades['value'] + trades['out_value']
         trades['ret_price'] = trades['price'].pct_change()
         trades['price_cum'] = (trades['ret_price'] + 1).cumprod()
         trades['gp'] = np.where((trades['status'] == 'open') | ((trades['position'] == 0) & (trades['status'] != 'close')),
                                0, trades['pnl'].diff())
-        trades['rets'] = np.where((trades['status'] == 'open') | ((trades['position'] == 0) & (trades['status'] != 'close')),
-                               0, trades['value2'].pct_change())
+        trades['rets'] = np.where(trades["status"] == "open", 0, trades["pnl_pct"].diff())
+        trades['cum_rets'] = (trades["rets"] + 1).cumprod()
+        
+        trades.fillna(0, inplace = True)
         
     
     def load(self, trades):
@@ -58,6 +59,4 @@ class Processing:
     
     
     
-        
-
     

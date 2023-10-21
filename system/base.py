@@ -16,32 +16,36 @@ class Asset:
         self.pnl = 0
         self.pnl_pct = 0
             
+            
     def get_pnl(self, price):
         if self.type == "SHORT":
             return self.in_value - abs(self.quantity * price)
         return abs(self.quantity * price) - self.in_value
     
+    
     def get_value(self, price):
         return self.in_value + self.get_pnl(price)
     
-    def update(self, state, price, quantity = 0):
+    def get_state(self, state):
         self.state = state
+    
+    def update(self, price, quantity = 0):
         
-        if state[0] == ("Open"):
+        if self.state[0] == ("Open"):
             self.quantity += quantity
             self.in_value = abs(self.quantity * price)
             self.pnl = self.get_pnl(price)
             self.pnl_pct = self.pnl / self.in_value
             self.out_value = 0
         
-        elif state[0] == ("Close"):
+        elif self.state[0] == ("Close"):
             self.out_value = abs(self.quantity * price)
             self.pnl = self.get_pnl(price)
             self.quantity += quantity
             self.pnl_pct = self.pnl / self.in_value
             self.in_value = 0
             
-        elif state[0] == ("-"):
+        elif self.state[0] == ("-"):
             self.out_value = 0
             self.pnl = self.get_pnl(price)
             self.pnl_pct = self.pnl / self.in_value if self.in_value !=0 else 0

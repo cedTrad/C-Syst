@@ -67,7 +67,7 @@ def add_scatter(fig, data, feature, name, color = None, col = None, row = None):
     )
 
 
-def add_bar(fig, col, row, data, feature, name, color = None):
+def add_bar(fig, data, feature, name, color = None, col = None, row = None):
     fig.add_trace(
         go.Bar(
             x = data.index, y = data[feature],
@@ -78,8 +78,11 @@ def add_bar(fig, col, row, data, feature, name, color = None):
     )
     
 
-def add_hline(fig, data, feature, col, row, color):
+def add_hline(fig, data, feature, color=None, col=None, row=None):
     fig.add_hline(y = data[feature].iloc[-1] , col = col, row = row, line_color = color)
+    
+def add_vline(fig, x , color=None, col=None, row=None):
+    fig.add_vline(x = x , col = col, row = row, line_color = color)
 
 
 def add_area(fig, data, color, feature, name, col = None , row = None):
