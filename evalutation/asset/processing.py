@@ -6,14 +6,18 @@ import ast
 class Processing:
     
     def add_trades_features(self, trades):
+        trades['gp'] = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]), trades['pnl'].diff(), 0)
+        trades["gp"] = np.where(trades["status"] == "Open", 0, trades["gp"])
+        trades["cum_gp"] = trades["gp"].cumsum()
+        
+        trades['rets'] = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]), trades['pnl_pct'].diff(), 0)
+        trades["rets"] = np.where(trades["status"] == "Open", 0, trades["rets"])
+        
         trades['ret_price'] = trades['price'].pct_change()
         trades['price_cum'] = (trades['ret_price'] + 1).cumprod()
-        trades['gp'] = np.where((trades['status'] == 'open') | ((trades['position'] == 0) & (trades['status'] != 'close')),
-                               0, trades['pnl'].diff())
-        trades['rets'] = np.where(trades["status"] == "open", 0, trades["pnl_pct"].diff())
-        trades['cum_rets'] = (trades["rets"] + 1).cumprod()
         
-        trades.fillna(0, inplace = True)
+        
+        #strades.fillna(0, inplace = True)
         
     
     def load(self, trades):
@@ -25,8 +29,8 @@ class Processing:
     
     
     def split_long_short(self, trades):
-        loc_long = np.where((trades["side"] == "LONG") | ((trades["side"] == None) & ( trades["status"] == "Close")))
-        loc_short = np.where((trades["side"] == "SHORT") | ((trades["side"] == None) & (trades["status"] == "Close")))
+        loc_long = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]) == "LONG")
+        loc_short = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]) == "SHORT")
         
         long_trade = trades.iloc[loc_long]
         short_trade = trades.iloc[loc_short]

@@ -14,6 +14,8 @@ class PFuture(Portfolio):
         Portfolio.__init__(self, name, capital)
         self.long = {}
         self.short = {}
+        self.long_portfolio = 0
+        self.short_portfolio = 0
 
 
 class PDefi:
@@ -23,25 +25,22 @@ class PDefi:
 
 class Env:
     
-    def __init__(self, symbols, capital, size = 10, interval = "1d", start = "2023", end = "2023"):
+    def __init__(self, symbols, capital, interval = "1d", start = "2023", end = "2023"):
         self.symbols = symbols
         self.capital = capital
         self.init_capital = capital
         self.data = {}
         
         self.journal = Journal()
-        self.future_portfolio = PFuture("crypto", capital)
+        self.future_portfolio = PFuture("Binance", capital)
         self.market = Market(start = start, end = end, interval = interval)
         
-        self.set_portfolio()
+        self.init_portfolio()
         
-    
-    def add_to_fportfolio(self, symbol):
-        self.future_portfolio.add_asset(Asset(symbol))
         
-    def set_portfolio(self):
+    def init_portfolio(self):
         for symbol in self.symbols:
-            self.add_to_fportfolio(symbol)
+            self.future_portfolio.add_asset(symbol)
 
 
     def get_state(self):
@@ -80,7 +79,7 @@ class Env:
     
     
     def reset(self):
-        self.set_portfolio()
+        self.init_portfolio()
         self.future_portfolio.clear()
         
         state = self.get_state()

@@ -25,10 +25,10 @@ class Journal:
         self.trades_data = pd.concat([self.trades_data, add], ignore_index = True)
         
         
-    def add_portfolio_line(self, date, portfolio):
+    def add_portfolio_line(self, date, symbol, portfolio):
         line = {'date' : date, 'risk_value' : portfolio.risk_value,
                 'available_value' : portfolio.available_value, 
-                'capital' : portfolio.capital}
+                'capital' : portfolio.capital, "symbol" : symbol}
         
         add = pd.DataFrame(line, index = [date])
         self.portfolio_data = pd.concat([self.portfolio_data, add], ignore_index = True)
@@ -41,6 +41,6 @@ class Journal:
     
     def add_data(self, date, price, asset, portfolio):
         self.add_trade_line(date, price, asset)
-        self.add_portfolio_line(date, portfolio)
+        self.add_portfolio_line(date, asset.symbol, portfolio)
 
 
