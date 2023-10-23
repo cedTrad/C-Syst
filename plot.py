@@ -78,6 +78,7 @@ def add_bar(fig, data, feature, name, color = None, col = None, row = None):
     )
     
 
+
 def add_hline(fig, data, feature, color=None, col=None, row=None):
     fig.add_hline(y = data[feature].iloc[-1] , col = col, row = row, line_color = color)
     
@@ -116,7 +117,7 @@ def add_second_y(fig, col, row, data, name = 'position'):
             name = name
         ),
         col = col, row = row,
-        secondary_y=True,
+        secondary_y=True
     )
 
 
@@ -142,7 +143,7 @@ def color_trades(fig, col, row, entry, exit, opacity):
     entry_date = entry.index.to_list()
     exit_date = exit.index.to_list()
     #colors = np.where(entry.side == "LONG", 'green', 'red')
-    colors = np.where(entry.pnl > 0, 'green', 'red')
+    colors = np.where(exit.pnl > 0, 'green', 'red')
     entry_price = entry.price.to_list()
     exit_price = exit.price.to_list()
     

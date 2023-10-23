@@ -11,14 +11,16 @@ class Reporting:
     
     def get_trades_data(self, postindicator, trades_data, portfolio_data):
         self.postindicator = postindicator
-        self.trades_data = trades_data
-        self.portfolio_data = portfolio_data
+        self.trades_data = trades_data.copy()
+        self.portfolio_data = portfolio_data.copy()
     
     
     def benchmark(self, symbol):
-        viz_benchmark = VizBenchmark(self.trades_data)
-        fig = viz_benchmark.show(symbol)
-        return fig
+        viz_benchmark = VizBenchmark(self.trades_data, self.portfolio_data)
+        fig = viz_benchmark.per_trade(symbol)
+        fig1 = viz_benchmark.values()
+        
+        return fig, fig1
     
         
     def plot_asset(self, symbol, type_ = "all"):
@@ -36,11 +38,11 @@ class Reporting:
     
     def plot_pnl(self, symbol):
         viz_pnl = VizPnl(self.trades_data)
-        fig = viz_pnl.long_short(symbol)
-        return fig
-        
-        
-        
+        fig = viz_pnl.long_short_per_step(symbol)
+        fig_t = viz_pnl.long_short_per_trade(symbol)
+        return fig, fig_t
+
+    
     def plot_risk(self):
         ""
     

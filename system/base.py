@@ -5,6 +5,7 @@ class Asset:
         self.symbol = symbol
         self.quantity = 0
         self.value = 0
+        self.value_re = 0
         self.position = 0
         self.in_value = 0
         self.tp = 0
@@ -18,8 +19,9 @@ class Asset:
             
             
     def get_pnl(self, price):
-        if self.type == "SHORT":
+        if self.state[1] == ("SHORT"):
             return self.in_value - abs(self.quantity * price)
+        
         return abs(self.quantity * price) - self.in_value
     
     
@@ -39,7 +41,7 @@ class Asset:
             self.out_value = 0
         
         elif self.state[0] == ("Close"):
-            self.out_value = abs(self.quantity * price)
+            self.out_value = self.get_value(price)
             self.pnl = self.get_pnl(price)
             self.quantity += quantity
             self.pnl_pct = self.pnl / self.in_value
@@ -52,7 +54,7 @@ class Asset:
         
         self.value = self.get_value(price)
         
-        
+        self.value_re = self.value if self.state[0] == ("Close") else self.value+self.out_value
         
 
 
@@ -86,7 +88,7 @@ class Portfolio:
         values = 0
         self.update_asset(asset)
         for asset in self.assets.values():
-            values += asset.value
+            values += asset.value_re
         self.risk_value = values
         
     def update(self, asset):
@@ -100,4 +102,6 @@ class Portfolio:
         self.risk_value = 0
         self.save_value = 0
         self.assets = {}
+        
+        
         
