@@ -27,18 +27,19 @@ class VizBenchmark:
                           )
         return fig
     
-    def values(self):
-        symbols = self.trades.keys()
-        fig = subplot(nb_cols = 1, nb_rows = len(symbols)+1)
+    def values(self, symbol):
+        fig = subplot(nb_cols = 1, nb_rows = 2)
         
-        for row, symbol in enumerate(symbols):
-            trade = self.trades[symbol]["all"].copy()
-            trade["value_re"] = trade["value"] + trade["out_value"]
-            add_bar(fig, trade, feature="value_re", name=symbol, col=1, row=row+1)
+        trade = self.trades[symbol]["all"].copy()
+        trade["value_re"] = trade["value"] + trade["out_value"]
         
-        add_line(fig, data=self.portfolio_data, feature="capital", name="portfolio", col=1, row=len(symbols)+1)
-        add_bar(fig, data=self.portfolio_data, feature="risk_value", name="risk", col=1, row=len(symbols)+1)
-        add_bar(fig, data=self.portfolio_data, feature="available_value", name="available", col=1, row=len(symbols)+1)
+        portfolio_data = self.portfolio_data.loc[self.portfolio_data["symbol"] == symbol]
+        
+        add_bar(fig, trade, feature="value_re", name=symbol, col=1, row=1)
+        
+        add_line(fig, data=portfolio_data, feature="capital", name="portfolio", col=1, row=2)
+        add_bar(fig, data=portfolio_data, feature="risk_value", name="risk", col=1, row=2)
+        add_bar(fig, data=portfolio_data, feature="available_value", name="available", col=1, row=2)
         fig.update_layout(height = 600 , width = 1200,
                           legend = dict(orientation="h",
                                         yanchor="bottom", y=1,
@@ -93,18 +94,20 @@ class VizAsset:
 
 class VizPortfolio:
     
-    def __init__(self, portfolio_data):
-        self.portfolio_data = portfolio_data
+    def __init__(self, portfolio_data, symbol):
+        self.symbol = symbol
+        self.portfolio_data = portfolio_data.copy()
     
     def show(self):
         
         self.portfolio_data.set_index("date", inplace = True)
+        portfolio_data = self.portfolio_data.loc[self.portfolio_data["symbol"] == self.symbol]
         
         fig = create_figure()
         
-        add_line(fig, data=self.portfolio_data, feature="capital", name="capital")
-        add_bar(fig, data=self.portfolio_data, feature="risk_value", name = "risk")
-        add_bar(fig, data=self.portfolio_data, feature="available_value", name = "available")
+        add_line(fig, data=portfolio_data, feature="capital", name="capital")
+        add_bar(fig, data=portfolio_data, feature="risk_value", name = "risk")
+        add_bar(fig, data=portfolio_data, feature="available_value", name = "available")
         
         fig.update_layout(height = 500 , width = 1000,
                           legend = dict(orientation="h",

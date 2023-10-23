@@ -3,13 +3,13 @@ class Momentum:
     def __init__(self, data):
         self.data = data.copy()
         
-    def update_params(self, params):
-        self.params = params
+    def update_params(self, m):
+        self.m = m
         
     def preprocess(self):
-        self.data['mom'] = self.data["close"].pct_change().rolling(self.params).mean()
+        self.data['mom'] = self.data["close"].pct_change().rolling(self.m).mean()
     
-    def run(self, bar):
+    def run(self, bar = -1):
         self.preprocess()
         
         if self.data["mom"].iloc[bar] > 0:
@@ -38,7 +38,7 @@ class TMM:
         self.data["m3"] = self.data.close.rolling(self.m3).mean()
         
     
-    def run(self, bar):
+    def run(self, bar = -1):
         self.preprocess()
         if self.data["m1"].iloc[bar] < self.data["m2"].iloc[bar] < self.data["m3"].iloc[bar]:
             return "LONG"

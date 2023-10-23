@@ -18,7 +18,7 @@ class Reporting:
     def benchmark(self, symbol):
         viz_benchmark = VizBenchmark(self.trades_data, self.portfolio_data)
         fig = viz_benchmark.per_trade(symbol)
-        fig1 = viz_benchmark.values()
+        fig1 = viz_benchmark.values(symbol)
         
         return fig, fig1
     
@@ -31,8 +31,8 @@ class Reporting:
         return fig
     
     
-    def plot_portfolio(self):
-        viz_port = VizPortfolio(self.portfolio_data)
+    def plot_portfolio(self, symbol):
+        viz_port = VizPortfolio(self.portfolio_data, symbol)
         fig = viz_port.show()
         return fig 
     

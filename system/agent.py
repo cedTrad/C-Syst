@@ -16,7 +16,7 @@ class Event:
 
 class Agent:
     
-    def __init__(self, symbol, allocation, env, policy_name=""):
+    def __init__(self, symbol, allocation, env, policy_name):
         self.symbol = symbol
         self.allocation = allocation
         
@@ -30,6 +30,7 @@ class Agent:
         self.postindicator = []
         
         self.policy = Politic(capital = allocation)
+        self.policy.select_rule(policy_name)
         self.gen_data = self.env.market.get_data(symbol)
         
         self.postprocessor = Postprocessor()
@@ -60,7 +61,9 @@ class Agent:
             lines = self.postprocessor.update_indicator(self.symbol)
             lines.update({"date" : event.date, "symbol" : self.symbol})
             self.postindicator.append(lines)
-            
+    
+    def update_policy_params(self, params):
+        self.policy.update_signal_params(params=params)
     
     def run_episode(self):
         state = self.env.reset()
@@ -77,6 +80,8 @@ class Agent:
             if "Close" in self.asset.state:
                 self.post_trade(event=event, trades_data = trades_data, close_trade=True)
     
+    def learn(self):
+        ""
     
     def get_report(self):
         self.report.get_trades_data(postindicator=self.postindicator, trades_data=self.trades_data,
@@ -93,8 +98,9 @@ class Agent:
         fig1.show()
         fig2.show()
         
-        fig2 = self.report.plot_portfolio()
+        fig2 = self.report.plot_portfolio(self.symbol)
         fig2.show()
         
-        
+    def optimize(self):
+        self.policy.signal
         

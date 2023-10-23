@@ -11,8 +11,10 @@ class Politic:
         self.capital = capital
         self.signal = Signal()
         self.management = Management(capital)
-        
     
+    def select_rule(self, policy_name):
+        self.policy_name = policy_name
+        
     def signal_policy(self, signal):
         return signal
     
@@ -21,10 +23,18 @@ class Politic:
         amount = available_amount
         return amount
     
+    def update_signal_params(self, params):
+        self.params = params
     
     def get_signal(self, data):
         self.signal.sets(data)
-        points = self.signal.get_points()
+        self.rule = self.signal.rules.get(self.policy_name)
+        if self.rule is None:
+            raise Exception("Policy name incorrect")
+        
+        self.rule.update_params(self.params)
+        
+        points = self.rule.run()
         signal = self.signal_policy(points)
         return signal
         
