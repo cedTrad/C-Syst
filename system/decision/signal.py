@@ -17,7 +17,10 @@ class Signal:
         
     
     def params(self):
-        self.st_tmm.set_params(3, 8, 14)
+        params = 3
+        self.st_mom.update_params(params)
+        params = (3, 8, 14)
+        self.st_tmm.update_params(params)
     
     
     def get_points(self, bar = -1):
