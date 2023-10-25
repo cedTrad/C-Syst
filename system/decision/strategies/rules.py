@@ -3,10 +3,13 @@ class Momentum:
     def __init__(self, data):
         self.data = data.copy()
         
+    def update_params(self, m):
+        self.m = m
+        
     def preprocess(self):
-        self.data['mom'] = self.data["close"].pct_change().rolling(3).mean()
+        self.data['mom'] = self.data["close"].pct_change().rolling(self.m).mean()
     
-    def run(self, bar):
+    def run(self, bar = -1):
         self.preprocess()
         
         if self.data["mom"].iloc[bar] > 0:
@@ -24,20 +27,19 @@ class TMM:
     def __init__(self, data):
         self.data = data.copy()
     
-    def set_params(self, m1, m2, m3):
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
+    def update_params(self, params):
+        self.m1 = params[0]
+        self.m2 = params[1]
+        self.m3 = params[2]
     
     def preprocess(self):
         self.data["m1"] = self.data.close.rolling(self.m1).mean()
         self.data["m2"] = self.data.close.rolling(self.m2).mean()
         self.data["m3"] = self.data.close.rolling(self.m3).mean()
-        #display(self.data.iloc[-1])
-    
-    def run(self, bar):
-        self.preprocess()
         
+    
+    def run(self, bar = -1):
+        self.preprocess()
         if self.data["m1"].iloc[bar] < self.data["m2"].iloc[bar] < self.data["m3"].iloc[bar]:
             return "LONG"
         elif self.data["m1"].iloc[bar] > self.data["m2"].iloc[bar] > self.data["m3"].iloc[bar]:
