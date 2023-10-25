@@ -80,6 +80,7 @@ class Agent:
             if "Close" in self.asset.state:
                 self.post_trade(event=event, trades_data = trades_data, close_trade=True)
     
+    
     def learn(self):
         ""
     
