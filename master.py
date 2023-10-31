@@ -24,6 +24,7 @@ class MasterAgentThread(Thread):
                 for agentId in self.agentList:
                     self.master_msg.update({agentId : "Place an Order ... "})
                 self.condition.notify_all()
+                print("Master a tous les agents , Activez-vous")
                 
                 while all([msg for msg in self.agent_msg.values()]) is False:
                     print("Waiting for agents ... ")

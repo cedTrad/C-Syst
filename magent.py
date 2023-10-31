@@ -82,7 +82,8 @@ class MAgentThread2(Agent, Thread):
                 while self.master_msg.get(self.agentId) is None:
                     print(f"{self.agentId} en attente des ordres du master ... ")
                     self.condition.wait()
-                    
+                
+                print(f"{self.agentId} en cours d'execution ... ")
                 get_msg = self.master_msg.get.pop(self.agentId)
                 
                 try:
