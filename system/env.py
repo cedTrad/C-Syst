@@ -62,13 +62,13 @@ class Env:
         fsm.perform(asset=asset, price=price, portfolio=self.future_portfolio)
         
     
-    def step(self, asset, event, signal_action, risk_action, test_state = True):
+    def step(self, agentId, asset, event, signal_action, risk_action, test_state = True):
         reward = 0
         self.execute(asset = asset, price = event.price,
                      signal_action = signal_action, risk_action = risk_action, test_state=test_state)
         
         self.future_portfolio.update(asset = asset)
-        self.journal.add_data(date = event.date, price = event.price,
+        self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
                               asset = asset, portfolio = self.future_portfolio)
         
         state = self.get_state()
