@@ -3,7 +3,7 @@ from threading import Thread, Condition, Event
 
 class MasterAgentThread(Thread):
     
-    def __init__(self, condition, activeAgent="", agent_msg="", master_msg="", msg_bus=""):
+    def __init__(self, condition, activeAgent="", agent_msg="", master_msg=""):
         Thread.__init__(self)
         self.activeAgent = activeAgent
         self.agentList = []
@@ -12,13 +12,11 @@ class MasterAgentThread(Thread):
         
         self.agent_msg = agent_msg
         self.master_msg = master_msg
-        self.msg_bus = msg_bus
+    
     
     def addAgent(self, agentId):
         self.agentList.append(agentId)
     
-    def assign_work(self):
-        ""
     
     def run(self):
         while True:
@@ -27,13 +25,15 @@ class MasterAgentThread(Thread):
                     self.master_msg.update({agentId : "Place an Order ... "})
                 self.condition.notify_all()
                 
+                while all([msg for msg in self.agent_msg.values()]) is False:
+                    print("Waiting for agents ... ")
+                    self.condition.wait()
                 
-                while 1:
-                    for agentId in self.agentList():
-                        if self.agent_msg[agentId] is None:
-                            self.condition.wait()
-                            
+                self.agent_msg.clear()
                 
+                
+    def global_report(self):
+        ""
                 
             
             

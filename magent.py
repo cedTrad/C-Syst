@@ -76,17 +76,28 @@ class MAgentThread2(Agent, Thread):
     def run(self):
         state = self.env.reset()
         i = 0
-        while True:                                               
-            try:
-                next_state, reward, event = self.update(state)
-                state = next_state
-                i += 1
-            except StopIteration:
-                break
+        while True:    
+            with self.condition:
+                
+                while self.master_msg.get(self.agentId) is None:
+                    print(f"{self.agentId} en attente des ordres du master ... ")
+                    self.condition.wait()
                     
-            trades_data = self.env.journal.trades_data.copy()
-            if "Close" in self.asset.state:
-                self.post_trade(event=event, trades_data = trades_data, close_trade=True)
-            print(f"{self.agentId} - date : {event.date}, {self.symbol}")
+                get_msg = self.master_msg.get.pop(self.agentId)
+                
+                try:
+                    next_state, reward, event = self.update(state)
+                    state = next_state
+                    i += 1
+                except StopIteration:
+                    break
+                        
+                trades_data = self.env.journal.trades_data.copy()
+                if "Close" in self.asset.state:
+                    self.post_trade(event=event, trades_data = trades_data, close_trade=True)
+                print(f"{self.agentId} - date : {event.date}, {self.symbol}")
+                
+                self.condition.notify()
+            
             self.barrier.wait()
             
