@@ -16,7 +16,8 @@ class Event:
 
 class Agent:
     
-    def __init__(self, symbol, allocation, env, policy_name):
+    def __init__(self, agentId, symbol, allocation, env, policy_name):
+        self.agentId = agentId
         self.symbol = symbol
         self.allocation = allocation
         
@@ -51,7 +52,7 @@ class Agent:
     def update(self, state):
         event = self.get_event()
         signal_action, risk_action = self.act(state)
-        next_state, reward = self.env.step(self.asset, event, signal_action, risk_action)
+        next_state, reward = self.env.step(self.agentId, self.asset, event, signal_action, risk_action)
         return next_state, reward, event
     
     
@@ -62,8 +63,10 @@ class Agent:
             lines.update({"date" : event.date, "symbol" : self.symbol})
             self.postindicator.append(lines)
     
+    
     def update_policy_params(self, params):
         self.policy.update_signal_params(params=params)
+    
     
     def run_episode(self):
         state = self.env.reset()

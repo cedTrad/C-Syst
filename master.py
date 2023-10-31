@@ -3,7 +3,7 @@ from threading import Thread, Condition, Event
 
 class MasterAgentThread(Thread):
     
-    def __init__(self, condition, activeAgent="", agent_msg="", master_msg=""):
+    def __init__(self, condition, activeAgent="", agent_msg="", master_msg="", msg_bus=""):
         Thread.__init__(self)
         self.activeAgent = activeAgent
         self.agentList = []
@@ -12,6 +12,7 @@ class MasterAgentThread(Thread):
         
         self.agent_msg = agent_msg
         self.master_msg = master_msg
+        self.msg_bus = msg_bus
     
     def addAgent(self, agentId):
         self.agentList.append(agentId)
