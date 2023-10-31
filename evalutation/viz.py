@@ -4,16 +4,26 @@ from plot import *
 
 class VizBenchmark:
     
-    def __init__(self, trades, portfolio_data = ""):
+    def __init__(self, agentId, trades, portfolio_data = ""):
+        self.agentId = agentId
         self.trades = trades.copy()
         self.portfolio_data = portfolio_data.copy()
         self.portfolio_data.set_index("date", inplace = True)
     
+    def preprocess(self):
+        self.trades = self.trades.loc[self.trades["agentId"] == self.agentId].copy()
+        self.trades["cum_gp"] = self.trades["cum_gp"] + self.portfolio_data["capital"].iloc[0]
+        self.trades["benchmark"] = self.trades["price_cum"] * self.portfolio_data["capital"].iloc[0]
+        
+        self.trades["value_re"] = self.trades["value"] + self.trades["out_value"]
+        self.portfolio_data = self.portfolio_data.loc[self.portfolio_data["agentId"] == self.agentId]
+        
+    
     def per_trade(self, symbol):
         
-        trade = self.trades[symbol]["all"].copy()
-        trade["cum_gp"] = trade["cum_gp"] + self.portfolio_data["capital"].iloc[0]
-        trade["benchmark"] = trade["price_cum"] * self.portfolio_data["capital"].iloc[0]
+        self.preprocess()
+        
+        trade = self.trades.copy()
         
         fig = create_figure()
         add_line(fig, trade, feature="benchmark", name="market")
@@ -28,12 +38,14 @@ class VizBenchmark:
         return fig
     
     def values(self, symbol):
+        
+        self.preprocess()
+        
         fig = subplot(nb_cols = 1, nb_rows = 2)
         
-        trade = self.trades[symbol]["all"].copy()
-        trade["value_re"] = trade["value"] + trade["out_value"]
+        trade = self.trades.copy()
+        portfolio_data = self.portfolio_data.copy()
         
-        portfolio_data = self.portfolio_data.loc[self.portfolio_data["symbol"] == symbol]
         
         add_bar(fig, trade, feature="value_re", name=symbol, col=1, row=1)
         
@@ -47,13 +59,23 @@ class VizBenchmark:
                           margin = {'t':0, 'b':0, 'l':10, 'r':0}
                           )
         return fig
-        return fig
+    
     
     def all(self):
         ""
         
+        
 
 class VizAsset:
+    
+    
+    def __init__(self, agentId, trades):
+        self.agentId = agentId
+        self.trades = trades.copy()
+    
+    def preprocess(self):
+        self.trades = self.trades.loc[self.trades["agentId"] == self.agentId].copy()
+        
     
     def get_points(self, trades):
         loc = np.where(trades['status'] == 'Open')
@@ -65,7 +87,11 @@ class VizAsset:
         return entry_points, exit_points
     
     
-    def candle(self, trades, data):
+    def candle(self, data):
+        self.preprocess()
+        
+        trades = self.trades.copy()
+        
         entry_points, exit_points = self.get_points(trades)
         start = trades.index[0]
         end = trades.index[-1]
@@ -92,16 +118,22 @@ class VizAsset:
         return fig
 
 
+
+
 class VizPortfolio:
     
-    def __init__(self, portfolio_data, symbol):
-        self.symbol = symbol
+    def __init__(self, agentId, portfolio_data):
+        self.agentId = agentId
         self.portfolio_data = portfolio_data.copy()
     
-    def show(self):
-        
+    def preprocess(self):
         self.portfolio_data.set_index("date", inplace = True)
-        portfolio_data = self.portfolio_data.loc[self.portfolio_data["symbol"] == self.symbol]
+        self.portfolio_data = self.portfolio_data.loc[self.portfolio_data["agentId"] == self.agentId].copy()
+    
+    def show(self):
+        self.preprocess()
+        
+        portfolio_data = self.portfolio_data
         
         fig = create_figure()
         
@@ -122,14 +154,30 @@ class VizPortfolio:
 
 class VizPnl:
     
-    def __init__(self, trades_data):
+    def __init__(self, agentId, trades_data):
+        self.agentId = agentId
         self.data = trades_data
     
+    def preprocess(self, symbol, mode = "per_step"):
+        self.data_long_per_step = self.data[symbol]["long"]
+        self.data_long_per_step = self.data_long_per_step.loc[self.data_long_per_step["agentId"] == self.agentId]
+        
+        self.data_short_per_step = self.data[symbol]["short"]
+        self.data_short_per_step = self.data_short_per_step.loc[self.data_short_per_step["agentId"] == self.agentId]
+        
+        self.data_long_per_trade = self.data[symbol]["long"][self.data[symbol]["long"]["status"] == "Close"]
+        self.data_long_per_trade = self.data_long_per_trade.loc[self.data_long_per_trade["agentId"] == self.agentId]
+        
+        self.data_short_per_trade = self.data[symbol]["short"][self.data[symbol]["short"]["status"] == "Close"]
+        self.data_short_per_trade = self.data_short_per_trade.loc[self.data_short_per_trade["agentId"] == self.agentId]
+    
+    
     def long_short_per_step(self, symbol):
+        self.preprocess(symbol)
         fig = subplot(nb_cols=2, nb_rows=1)
         
-        data_long = self.data[symbol]["long"]
-        data_short = self.data[symbol]["short"]
+        data_long = self.data_long_per_step.copy()
+        data_short = self.data_short_per_step.copy()
         
         add_hist(fig, data_long, feature="rets", name="long", col=1, row=1)
         add_hist(fig, data_short, feature="rets", name="short", col=1, row=1)
@@ -148,11 +196,13 @@ class VizPnl:
         return fig
     
     def long_short_per_trade(self, symbol):
+        
+        self.preprocess(symbol)
+        
         fig = subplot(nb_cols=2, nb_rows=1)
         
-        data_long = self.data[symbol]["long"][self.data[symbol]["long"]["status"] == "Close"]
-        data_short = self.data[symbol]["short"][self.data[symbol]["short"]["status"] == "Close"]
-        
+        data_long = self.data_long_per_trade.copy()
+        data_short = self.data_short_per_trade.copy()
         
         add_hist(fig, data_long, feature="pnl", name="long", col=1, row=1)
         add_hist(fig, data_short, feature="pnl", name="short", col=1, row=1)

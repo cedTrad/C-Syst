@@ -91,18 +91,18 @@ class Agent:
         self.report.get_trades_data(postindicator=self.postindicator, trades_data=self.trades_data,
                                     portfolio_data=self.env.journal.portfolio_data)
         
-        fig0, fig1 = self.report.benchmark(self.symbol)
+        fig0, fig1 = self.report.benchmark(self.agentId, self.symbol)
         fig0.show()
         fig1.show()
         
-        fig = self.report.plot_asset(symbol=self.symbol)
+        fig = self.report.plot_asset(self.agentId, self.symbol)
         fig.show()
         
-        fig1, fig2 = self.report.plot_pnl(self.symbol)
+        fig1, fig2 = self.report.plot_pnl(self.agentId, self.symbol)
         fig1.show()
         fig2.show()
         
-        fig2 = self.report.plot_portfolio(self.symbol)
+        fig2 = self.report.plot_portfolio(self.agentId)
         fig2.show()
         
     def optimize(self):
