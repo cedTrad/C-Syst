@@ -1,8 +1,9 @@
-from dataEngine.journal import Journal
-
 from .base import Portfolio, Asset
 from .fsm import FSM
 from .market import Market
+
+from evalutation.reporting import Reporting
+from dataEngine.journal import Journal
 
 signal_action = ["Open", "Close", "Resize", "-", None]
 risk_action = ["quantity", "leverage", "closePrice", "sl", "tp"]
@@ -77,6 +78,9 @@ class Env:
         
         return state, reward
     
+    
+    def globalReport(self):
+        ""
     
     def reset(self):
         self.init_portfolio()

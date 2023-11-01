@@ -1,5 +1,6 @@
 import numpy as np
 from plot import *
+import plotly.figure_factory as ff
 
 
 class VizBenchmark:
@@ -11,9 +12,10 @@ class VizBenchmark:
         self.portfolio_data.set_index("date", inplace = True)
     
     def preprocess(self):
+        capital = self.portfolio_data["capital"].iloc[0]
         self.trades = self.trades.loc[self.trades["agentId"] == self.agentId].copy()
-        self.trades["cum_gp"] = self.trades["cum_gp"] + self.portfolio_data["capital"].iloc[0]
-        self.trades["benchmark"] = self.trades["price_cum"] * self.portfolio_data["capital"].iloc[0]
+        self.trades["cum_gp"] = self.trades["cum_gp"] + capital
+        self.trades["benchmark"] = self.trades["price_cum"] * capital
         
         self.trades["value_re"] = self.trades["value"] + self.trades["out_value"]
         self.portfolio_data = self.portfolio_data.loc[self.portfolio_data["agentId"] == self.agentId]
@@ -220,10 +222,74 @@ class VizPnl:
                           )
         return fig
 
+
           
 class VizRisk:
     
     def __init__(self):
         self.p = 0
 
+
+
+
+class CompareViz:
+    
+    def __init__(self, agentIds, trades, portfolio_data):
+        self.agentIds = agentIds
+        self.trades = trades
+        self.portfolio_data = portfolio_data
+    
+
+    def preprocess(self, symbol, side="all"):
+        
+        self.tradesR = self.trades[symbol][side][self.trades[symbol][side]["status"] == "Close"]
+        self.tradesRs = []
+        self.tradesS = []
+        
+        for agentId in self.agentIds:    
+            self.tradesRs[agentId] = self.tradesR[self.tradesR["agentId"] == agentId]
+            
+            self.portfolio_data[self.portfolio_data["agentId"] == agentId]
+            
+            data = self.trades.loc[self.trades["agentId"] == agentId].copy()
+            data["cum_gp"] = data["cum_gp"] + self.capital
+            data["benchmark"] = data["price_cum"] * self.capital
+            data["value_re"] = data["value"] + data["out_value"]
+            
+            self.tradesS[agentId] = data
+            
+            
+    def equity(self, symbol):
+        self.preprocess(symbol)
+        
+        fig = create_figure()
+        for agentId in self.agentIds:
+            trade = self.tradesS[agentId]
+            
+            add_line(fig, trade, feature="benchmark", name=f"market_{agentId} {symbol}")
+            add_line(fig, trade, feature="cum_gp", name=f"{symbol}_{agentId}")
+        
+        fig.update_layout(height = 400 , width = 1000,
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0}
+                          )
+        return fig
+        
+        
+    def pnl(self):
+        
+        hist_data = []
+        group_labels = self.agentIds.copy()
+        for agentId in self.agentIds:
+            data = self.tradesRs[agentId]["pnl"]
+            hist_data.append(data)
+
+        # Create distplot with custom bin_size
+        fig = ff.create_distplot(hist_data, group_labels, bin_size=.2)
+        
+        return fig
+            
+    
         

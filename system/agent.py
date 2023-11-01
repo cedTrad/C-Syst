@@ -27,7 +27,6 @@ class Agent:
         self.policy_name = policy_name
         
         self.fitness = []
-        self.trades_data = None
         self.postindicator = []
         
         self.policy = Politic(capital = allocation)
@@ -79,8 +78,8 @@ class Agent:
             except StopIteration:
                 break
                 
-            trades_data = self.env.journal.trades_data.copy()
             if "Close" in self.asset.state:
+                trades_data = self.env.journal.trades_data.loc[self.env.journal.trades_data["agentId"] == self.agentId]
                 self.post_trade(event=event, trades_data = trades_data, close_trade=True)
     
     
@@ -104,6 +103,7 @@ class Agent:
         
         fig2 = self.report.plot_portfolio(self.agentId)
         fig2.show()
+        
         
     def optimize(self):
         self.policy.signal

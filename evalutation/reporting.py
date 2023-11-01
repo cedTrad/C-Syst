@@ -1,11 +1,14 @@
-from .viz import VizBenchmark, VizAsset, VizPortfolio, VizPnl, VizRisk
+from .viz import VizBenchmark, VizAsset, VizPortfolio, VizPnl, VizRisk, CompareViz
 from dataEngine.data import connect_db
 
 
 class Reporting:
     
-    def __init__(self, env):
+    def __init__(self, env, agentIds, symbols):
+        self.agentIds = agentIds
+        self.symbols = symbols
         self.db = env.market.db
+    
     
     def get_trades_data(self, postindicator, trades_data, portfolio_data):
         self.postindicator = postindicator
@@ -39,6 +42,7 @@ class Reporting:
         fig = viz_port.show()
         return fig 
     
+    
     def plot_pnl(self, agentId, symbol):
         
         viz_pnl = VizPnl(agentId, self.trades_data)
@@ -50,3 +54,8 @@ class Reporting:
     def plot_risk(self):
         ""
     
+    
+    def compare(self, symbol):
+        compare_agent = CompareViz(self.agentIds, self.trades_data, self.portfolio_data)
+        fig_e = compare_agent.equity(symbol)
+        fig_p = compare_agent.pnl()
