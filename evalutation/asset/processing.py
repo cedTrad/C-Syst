@@ -15,8 +15,6 @@ class Processing:
         
         trades['ret_price'] = trades['price'].pct_change()
         trades['price_cum'] = (trades['ret_price'] + 1).cumprod()
-        
-        
         #strades.fillna(0, inplace = True)
         
     
@@ -40,20 +38,20 @@ class Processing:
     
     def split_asset(self, trades):
         datas = {}
-        symbols = trades['symbol'].unique()
-        for symbol in symbols:
-            trade = trades[trades['symbol'] == symbol].copy()
+        agentIds = trades['agentId'].unique()
+        for agentId in agentIds:
+            trade = trades[trades['agentId'] == agentId].copy()
             long_trade, short_trade = self.split_long_short(trade)
             
-            datas[symbol] = {
+            datas[agentId] = {
                 "all" : trade,
                 "long" : long_trade,
                 "short" : short_trade
             }
             
             for data_type in ["all", "long", "short"]:
-                self.add_trades_features(datas[symbol][data_type])
-                self.recovery_per_trade(datas[symbol][data_type])
+                self.add_trades_features(datas[agentId][data_type])
+                self.recovery_per_trade(datas[agentId][data_type])
         return datas
     
     

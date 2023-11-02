@@ -42,8 +42,12 @@ class Env:
     def init_portfolio(self):
         for symbol in self.symbols:
             self.future_portfolio.add_asset(symbol)
-
-
+            
+    
+    def config_agents(self, agentIds):
+        self.agentIds = agentIds
+    
+    
     def get_state(self):
         portfolio = {"capital" : self.future_portfolio.capital,
                     "risk_value" : self.future_portfolio.risk_value,

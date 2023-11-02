@@ -4,9 +4,10 @@ from dataEngine.data import connect_db
 
 class Reporting:
     
-    def __init__(self, env, agentIds, symbols):
+    def __init__(self, env, agentIds, trades : dict, portfolios : dict):
         self.agentIds = agentIds
-        self.symbols = symbols
+        self.trades = trades
+        self.portfolios = portfolios
         self.db = env.market.db
     
     
@@ -15,22 +16,22 @@ class Reporting:
         self.trades_data = trades_data.copy()
         self.portfolio_data = portfolio_data.copy()
     
-
-    def benchmark(self,agentId, symbol, type_ = "all"):
+    
+    def benchmark(self, agentId, symbol, side = "all"):
         
-        trades = self.trades_data[symbol][type_]
+        trades = self.trades_data[agentId][side]
         
         viz_benchmark = VizBenchmark(agentId, trades, self.portfolio_data)
-        fig = viz_benchmark.per_trade(symbol)
-        fig1 = viz_benchmark.values(symbol)
+        fig_pt = viz_benchmark.per_trade(symbol)
+        fig_v = viz_benchmark.values(symbol)
         
-        return fig, fig1
+        return fig_pt, fig_v
     
         
-    def plot_asset(self, agentId, symbol, type_ = "all"):
+    def plot_asset(self, agentId, symbol, side = "all"):
         
         data = self.db.get_data(symbol)
-        trades = self.trades_data[symbol][type_]
+        trades = self.trades_data[agentId][side]
         
         viz_asset = VizAsset(agentId, trades)
         fig = viz_asset.candle(data=data)
@@ -59,3 +60,5 @@ class Reporting:
         compare_agent = CompareViz(self.agentIds, self.trades_data, self.portfolio_data)
         fig_e = compare_agent.equity(symbol)
         fig_p = compare_agent.pnl()
+        
+        
