@@ -4,9 +4,6 @@ from .decision.politic import Politic
 from .oms import OMS
 from .base import Asset
 
-from evalutation.asset.postprocessor import Postprocessor
-from evalutation.reporting import Reporting
-
 
 class Event:
      def __init__(self, date, price):
@@ -27,16 +24,14 @@ class Agent:
         self.policy_name = policy_name
         
         self.fitness = []
-        self.trades_data = None
         self.postindicator = []
         
         self.policy = Politic(capital = allocation)
         self.policy.select_rule(policy_name)
         self.gen_data = self.env.market.get_data(symbol)
         
-        self.postprocessor = Postprocessor()
-        self.report = Reporting(env)
-        
+
+
     
     def get_event(self):
         self.data = next(self.gen_data)
@@ -56,12 +51,12 @@ class Agent:
         return next_state, reward, event
     
     
-    def post_trade(self, event, trades_data, close_trade = False):
-        self.trades_data = copy.deepcopy(self.postprocessor.get_data(trades_data))
+    def post_trade(self, event, close_trade = False):
         if close_trade:
-            lines = self.postprocessor.update_indicator(self.symbol)
-            lines.update({"date" : event.date, "symbol" : self.symbol})
-            self.postindicator.append(lines)
+            self.env.set_evaluation()
+            indicators = self.env.postprocessor.update_indicator(self.agentId)
+            indicators.update({"date" : event.date, "symbol" : self.symbol})
+            self.postindicator.append(indicators)
     
     
     def update_policy_params(self, params):
@@ -79,31 +74,17 @@ class Agent:
             except StopIteration:
                 break
                 
-            trades_data = self.env.journal.trades_data.copy()
-            if "Close" in self.asset.state:
-                self.post_trade(event=event, trades_data = trades_data, close_trade=True)
+            #if "Close" in self.asset.state:
+            #    self.post_trade(event=event, close_trade=True)
     
     
     def learn(self):
         ""
-    
+        
+        
     def get_report(self):
-        self.report.get_trades_data(postindicator=self.postindicator, trades_data=self.trades_data,
-                                    portfolio_data=self.env.journal.portfolio_data)
-        
-        fig0, fig1 = self.report.benchmark(self.symbol)
-        fig0.show()
-        fig1.show()
-        
-        fig = self.report.plot_asset(symbol=self.symbol)
-        fig.show()
-        
-        fig1, fig2 = self.report.plot_pnl(self.symbol)
-        fig1.show()
-        fig2.show()
-        
-        fig2 = self.report.plot_portfolio(self.symbol)
-        fig2.show()
+        ""
+
         
     def optimize(self):
         self.policy.signal

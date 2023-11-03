@@ -1,8 +1,11 @@
-from dataEngine.journal import Journal
-
 from .base import Portfolio, Asset
 from .fsm import FSM
 from .market import Market
+
+from evalutation.reporting import Reporting
+from evalutation.postprocessor import Postprocessor
+
+from dataEngine.journal import Journal
 
 signal_action = ["Open", "Close", "Resize", "-", None]
 risk_action = ["quantity", "leverage", "closePrice", "sl", "tp"]
@@ -36,13 +39,19 @@ class Env:
         self.market = Market(start = start, end = end, interval = interval)
         
         self.init_portfolio()
+        self.postprocessor = Postprocessor()
         
         
     def init_portfolio(self):
         for symbol in self.symbols:
             self.future_portfolio.add_asset(symbol)
-
-
+            
+    
+    def config_agents(self, agentIds):
+        self.agentIds = agentIds
+        self.report = Reporting(agentIds, db=self.market.db)
+    
+    
     def get_state(self):
         portfolio = {"capital" : self.future_portfolio.capital,
                     "risk_value" : self.future_portfolio.risk_value,
@@ -76,6 +85,43 @@ class Env:
             reward = asset.pnl
         
         return state, reward
+    
+    
+    def process(self):
+        tradesData = self.journal.tradesData
+        portfolioData = self.journal.portfolioData
+        self.trades, self.portfolios, self.tradesData, self.portfolioData = self.postprocessor.load(tradesData, portfolioData)
+    
+    
+    def update_indicator(self):
+        ""
+    
+    
+    def get_report(self, agentId, symbol):
+        self.process()
+        self.report.load(self.trades, self.portfolios)
+        
+        fig0, fig1 = self.report.benchmark(agentId, symbol)
+        fig0.show()
+        
+        fig = self.report.plot_asset(agentId, symbol)
+        fig.show()
+        
+        fig1.show()
+        
+        
+        #fig2 = self.report.plot_portfolio(self.agentId)
+        #fig2.show()
+        
+    
+    
+    def globalReport(self):
+        self.report.load(self.trades, self.portfolios)
+        fig_e, fig_p = self.report.compare()
+        
+        fig_e.show()
+        fig_p.show()
+        
     
     
     def reset(self):

@@ -8,9 +8,9 @@ import os
 class Journal:
     
     def __init__(self, database_config = None):
-        self.portfolio_data = pd.DataFrame()
-        self.metrics_data = pd.DataFrame()
-        self.trades_data = pd.DataFrame()
+        self.portfolioData = pd.DataFrame()
+        self.metricsData = pd.DataFrame()
+        self.tradesData = pd.DataFrame()
     
     
     def add_trade_line(self, agentId, date, price, asset):
@@ -21,7 +21,7 @@ class Journal:
                 'value' : asset.value, 'pnl' : asset.pnl, 'pnl_pct' : asset.pnl_pct,
                 'symbol' : asset.symbol}
         add = pd.DataFrame(line , index = [date])
-        self.trades_data = pd.concat([self.trades_data, add], ignore_index = True)
+        self.tradesData = pd.concat([self.tradesData, add], ignore_index = True)
         
         
     def add_portfolio_line(self, agentId, date, symbol, portfolio):
@@ -30,12 +30,12 @@ class Journal:
                 'capital' : portfolio.capital, "symbol" : symbol}
         
         add = pd.DataFrame(line, index = [date])
-        self.portfolio_data = pd.concat([self.portfolio_data, add], ignore_index = True)
+        self.portfolioData = pd.concat([self.portfolioData, add], ignore_index = True)
     
     
     def add_metrics_line(self, date, line):
         add = pd.DataFrame(line, index=[date])
-        self.metrics_data = pd.concat([self.metrics_data, add], ignore_index=True)
+        self.metricsData = pd.concat([self.metricsData, add], ignore_index=True)
 
     
     def add_data(self, agentId, date, price, asset, portfolio):

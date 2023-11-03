@@ -15,17 +15,36 @@ class Processing:
         
         trades['ret_price'] = trades['price'].pct_change()
         trades['price_cum'] = (trades['ret_price'] + 1).cumprod()
-        
-        
         #strades.fillna(0, inplace = True)
         
     
-    def load(self, trades):
-        trades = trades.copy()
-        trades.drop(columns = ['key'], inplace = True, errors = 'ignore')
-        trades.set_index('date', inplace = True)
-        trades["status"] = trades["state"].apply(lambda x : ast.literal_eval(x)[0])
-        return trades
+    def load(self, tradesData):
+        self.tradesData = tradesData.copy()
+        self.tradesData.drop(columns = ['key'], inplace = True, errors = 'ignore')
+        self.tradesData.set_index('date', inplace = True)
+        self.tradesData["status"] = self.tradesData["state"].apply(lambda x : ast.literal_eval(x)[0])
+        return self.tradesData
+    
+    def split_asset_by_agent(self):
+        agentIds = self.tradesData['agentId'].unique()
+        datas = {}
+        for agentId in agentIds:
+            trades = self.tradesData[self.tradesData['agentId'] == agentId].copy()
+            self.add_trades_features(trades)
+            self.recovery_per_trade(trades)
+            datas[agentId] = trades
+        return datas
+    
+    
+    def recovery_per_trade(self, trades):
+        trades["loss"] = np.where(trades["pnl_pct"] <= 0, trades["pnl_pct"], 0)
+        trades["recovery"] = (1 / (1 + trades["loss"])) - 1
+    
+    
+    
+    
+    
+    
     
     
     def split_long_short(self, trades):
@@ -40,27 +59,21 @@ class Processing:
     
     def split_asset(self, trades):
         datas = {}
-        symbols = trades['symbol'].unique()
-        for symbol in symbols:
-            trade = trades[trades['symbol'] == symbol].copy()
+        agentIds = trades['agentId'].unique()
+        for agentId in agentIds:
+            trade = trades[trades['agentId'] == agentId].copy()
             long_trade, short_trade = self.split_long_short(trade)
             
-            datas[symbol] = {
+            datas[agentId] = {
                 "all" : trade,
                 "long" : long_trade,
                 "short" : short_trade
             }
             
             for data_type in ["all", "long", "short"]:
-                self.add_trades_features(datas[symbol][data_type])
-                self.recovery_per_trade(datas[symbol][data_type])
+                self.add_trades_features(datas[agentId][data_type])
+                self.recovery_per_trade(datas[agentId][data_type])
         return datas
-    
-    
-    def recovery_per_trade(self, trades):
-        trades["loss"] = np.where(trades["pnl_pct"] <= 0, trades["pnl_pct"], 0)
-        trades["recovery"] = (1 / (1 + trades["loss"])) - 1
-    
     
     
     
