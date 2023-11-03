@@ -13,8 +13,6 @@ class VizBenchmark:
     
     def preprocess(self):
         portfolioData = self.portfolios[self.agentId].copy()
-        #portfolioData.set_index("date", inplace = True)
-        
         capital = portfolioData["capital"].iloc[0]
         
         tradesData = self.trades[self.agentId].copy()
@@ -132,9 +130,9 @@ class CompareViz:
         
         for agentId in self.agentIds:
             tradesR = self.trades[agentId].copy()
-            self.tradesRs[agentId] = [tradesR["status"] == "Close"]
+            self.tradesRs[agentId] = tradesR[tradesR["status"] == "Close"]
             
-            capital = self.portfolios[self.agentId]["capital"].iloc[0]
+            capital = self.portfolios[agentId]["capital"].iloc[0]
             
             trades = self.trades[agentId].copy()
             trades["cum_gp"] = trades["cum_gp"] + capital
@@ -154,10 +152,7 @@ class CompareViz:
             add_line(fig, trade, feature="cum_gp", name=f"{symbol}_{agentId}")
         
         fig.update_layout(height = 400 , width = 1000,
-                          legend = dict(orientation="h",
-                                        yanchor="bottom", y=1,
-                                        xanchor="right", x=0.5),
-                          margin = {'t':0, 'b':0, 'l':10, 'r':0}
+                          margin = {'t':0, 'b':0, 'l': 0, 'r':10}
                           )
         return fig
         
@@ -165,7 +160,7 @@ class CompareViz:
     def pnl(self):
         
         hist_data = []
-        group_labels = self.agentIds.copy()
+        group_labels = self.agentIds
         for agentId in self.agentIds:
             data = self.tradesRs[agentId]["pnl"]
             hist_data.append(data)
@@ -173,7 +168,13 @@ class CompareViz:
         # Create distplot with custom bin_size
         fig = ff.create_distplot(hist_data, group_labels, bin_size=.2)
         
+        fig.update_layout(height = 400 , width = 1000,
+                          margin = {'t':0, 'b':0, 'l': 0, 'r':10}
+                          )
+        
         return fig
+  
+  
             
 
 class VizPortfolio:
@@ -203,11 +204,7 @@ class VizPortfolio:
                           )
         return fig 
     
-
-      
-      
-      
-      
+   
       
       
         

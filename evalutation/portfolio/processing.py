@@ -6,22 +6,23 @@ import ast
 class Processing:
     
     
-    def load(self, portfolio_data):
-        self.portfolio_data = portfolio_data
-        #portfolio_data.set_index("date", inplace = True)
+    def load(self, portfolioData):
+        self.portfolioData = portfolioData
+        #portfolioData.set_index("date", inplace = True)
+        return self.portfolioData
         
         
     def split_by_agent(self):
-        agentIds = self.portfolio_data["agentId"].unique()
+        agentIds = self.portfolioData["agentId"].unique()
         portfolios = {}
         for agentId in agentIds:
-            portfolios[agentId] = self.portfolio_data[self.portfolio_data["agentId"] == agentId]
+            portfolios[agentId] = self.portfolioData[self.portfolioData["agentId"] == agentId]
         return portfolios
     
     
-    def add_features(self, portfolio_data):
-        portfolio_data["rets"] = portfolio_data["capital"].pct_change()
-        portfolio_data["cum_rets"] = (portfolio_data["rets"] + 1).cumprod()
+    def add_features(self, portfolioData):
+        portfolioData["rets"] = portfolioData["capital"].pct_change()
+        portfolioData["cum_rets"] = (portfolioData["rets"] + 1).cumprod()
         
     
     

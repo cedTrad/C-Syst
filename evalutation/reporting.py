@@ -43,7 +43,7 @@ class Reporting:
         ""
     
     
-    def compare(self, symbol):
+    def compare(self):
         compare_agent = CompareViz(self.agentIds, self.trades, self.portfolios)
         fig_e = compare_agent.equity()
         fig_p = compare_agent.pnl()

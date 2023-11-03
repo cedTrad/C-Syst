@@ -12,13 +12,13 @@ class Postprocessor:
         self.processPort = PProcessing()
     
     
-    def get_data(self, tradesData, portfolioData):
-        trades_data = self.processAsset.load(tradesData)
-        self.processPort.load(portfolioData)
+    def load(self, tradesData, portfolioData):
+        tradesData = self.processAsset.load(tradesData)
+        portfolioData = self.processPort.load(portfolioData)
         
-        self.trades = self.processAsset.split_asset_by_agent(trades_data)
+        self.trades = self.processAsset.split_asset_by_agent()
         self.portfolios = self.processPort.split_by_agent()
-        return self.trades, self.portfolios
+        return self.trades, self.portfolios, tradesData, portfolioData
     
     
     def update_indicator(self, agentId):

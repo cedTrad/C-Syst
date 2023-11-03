@@ -18,19 +18,18 @@ class Processing:
         #strades.fillna(0, inplace = True)
         
     
-    def load(self, trades):
-        trades = trades.copy()
-        trades.drop(columns = ['key'], inplace = True, errors = 'ignore')
-        trades.set_index('date', inplace = True)
-        trades["status"] = trades["state"].apply(lambda x : ast.literal_eval(x)[0])
-        return trades
+    def load(self, tradesData):
+        self.tradesData = tradesData.copy()
+        self.tradesData.drop(columns = ['key'], inplace = True, errors = 'ignore')
+        self.tradesData.set_index('date', inplace = True)
+        self.tradesData["status"] = self.tradesData["state"].apply(lambda x : ast.literal_eval(x)[0])
+        return self.tradesData
     
-    
-    def split_asset_by_agent(self, trades):
-        agentIds = trades['agentId'].unique()
+    def split_asset_by_agent(self):
+        agentIds = self.tradesData['agentId'].unique()
         datas = {}
         for agentId in agentIds:
-            trades = trades[trades['agentId'] == agentId].copy()
+            trades = self.tradesData[self.tradesData['agentId'] == agentId].copy()
             self.add_trades_features(trades)
             self.recovery_per_trade(trades)
             datas[agentId] = trades

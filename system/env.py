@@ -88,16 +88,18 @@ class Env:
     
     
     def process(self):
-        trades_data = self.journal.trades_data
-        portfolio_data = self.journal.portfolio_data
-        tradesData, portfolioData = self.postprocessor.get_data(trades_data, portfolio_data)
-        
-        return tradesData, portfolioData
+        tradesData = self.journal.tradesData
+        portfolioData = self.journal.portfolioData
+        self.trades, self.portfolios, self.tradesData, self.portfolioData = self.postprocessor.load(tradesData, portfolioData)
+    
+    
+    def update_indicator(self):
+        ""
     
     
     def get_report(self, agentId, symbol):
-        trades , portfolios = self.process()
-        self.report.load(trades, portfolios)
+        self.process()
+        self.report.load(self.trades, self.portfolios)
         
         fig0, fig1 = self.report.benchmark(agentId, symbol)
         fig0.show()
@@ -114,7 +116,13 @@ class Env:
     
     
     def globalReport(self):
-        ""
+        self.report.load(self.trades, self.portfolios)
+        fig_e, fig_p = self.report.compare()
+        
+        fig_e.show()
+        fig_p.show()
+        
+    
     
     def reset(self):
         self.init_portfolio()
