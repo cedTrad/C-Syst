@@ -40,9 +40,7 @@ class MAgentThread(Agent, Thread):
                     self.condition.notify()
                     break
                         
-                trades_data = self.env.journal.trades_data.copy()
-                if "Close" in self.asset.state:
-                    self.post_trade(event=event, trades_data = trades_data, close_trade=True)
+                        
                 print(f"{self.agentId} - date : {event.date}, {self.symbol}")
                 
                 self.agent_msg.update({self.agentId : "order placed ... "})

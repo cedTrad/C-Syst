@@ -8,7 +8,7 @@ class Processing:
     
     def load(self, portfolio_data):
         self.portfolio_data = portfolio_data
-        portfolio_data.set_index("date", inplace = True)
+        #portfolio_data.set_index("date", inplace = True)
         
         
     def split_by_agent(self):

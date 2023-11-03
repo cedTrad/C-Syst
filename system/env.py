@@ -3,6 +3,8 @@ from .fsm import FSM
 from .market import Market
 
 from evalutation.reporting import Reporting
+from evalutation.postprocessor import Postprocessor
+
 from dataEngine.journal import Journal
 
 signal_action = ["Open", "Close", "Resize", "-", None]
@@ -37,6 +39,7 @@ class Env:
         self.market = Market(start = start, end = end, interval = interval)
         
         self.init_portfolio()
+        self.postprocessor = Postprocessor()
         
         
     def init_portfolio(self):
@@ -46,6 +49,7 @@ class Env:
     
     def config_agents(self, agentIds):
         self.agentIds = agentIds
+        self.report = Reporting(agentIds, db=self.market.db)
     
     
     def get_state(self):
@@ -81,6 +85,32 @@ class Env:
             reward = asset.pnl
         
         return state, reward
+    
+    
+    def process(self):
+        trades_data = self.journal.trades_data
+        portfolio_data = self.journal.portfolio_data
+        tradesData, portfolioData = self.postprocessor.get_data(trades_data, portfolio_data)
+        
+        return tradesData, portfolioData
+    
+    
+    def get_report(self, agentId, symbol):
+        trades , portfolios = self.process()
+        self.report.load(trades, portfolios)
+        
+        fig0, fig1 = self.report.benchmark(agentId, symbol)
+        fig0.show()
+        
+        fig = self.report.plot_asset(agentId, symbol)
+        fig.show()
+        
+        fig1.show()
+        
+        
+        #fig2 = self.report.plot_portfolio(self.agentId)
+        #fig2.show()
+        
     
     
     def globalReport(self):

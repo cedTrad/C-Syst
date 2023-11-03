@@ -26,6 +26,28 @@ class Processing:
         return trades
     
     
+    def split_asset_by_agent(self, trades):
+        agentIds = trades['agentId'].unique()
+        datas = {}
+        for agentId in agentIds:
+            trades = trades[trades['agentId'] == agentId].copy()
+            self.add_trades_features(trades)
+            self.recovery_per_trade(trades)
+            datas[agentId] = trades
+        return datas
+    
+    
+    def recovery_per_trade(self, trades):
+        trades["loss"] = np.where(trades["pnl_pct"] <= 0, trades["pnl_pct"], 0)
+        trades["recovery"] = (1 / (1 + trades["loss"])) - 1
+    
+    
+    
+    
+    
+    
+    
+    
     def split_long_short(self, trades):
         loc_long = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]) == "LONG")
         loc_short = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]) == "SHORT")
@@ -53,12 +75,6 @@ class Processing:
                 self.add_trades_features(datas[agentId][data_type])
                 self.recovery_per_trade(datas[agentId][data_type])
         return datas
-    
-    
-    def recovery_per_trade(self, trades):
-        trades["loss"] = np.where(trades["pnl_pct"] <= 0, trades["pnl_pct"], 0)
-        trades["recovery"] = (1 / (1 + trades["loss"])) - 1
-    
     
     
     
