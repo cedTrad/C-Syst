@@ -1,102 +1,89 @@
 import pandas as pd
 import numpy as np
-
 import scipy.stats
-from scipy.stats import norm
-
-
 
 class Metric:
     
+    INDEX_VALUES = [
+        "equityInitial", "totalTrades", "totalPnl", "winRate",
+        "Expectancy", "equityFinal", "equityPeak",
+        "amountWin", "amountLoss", "avgWin", "avgLoss",
+        "bestTrade", "worstTrade", "profitFactor"
+    ]
+    
     def __init__(self):
-        self.df = pd.DataFrame(index = ["Equity Initial", "Total Trades", "Total Pnl", "Win Rate",
-                                        "Expentancy", "Equity Final", "Equity Peak",
-                                        "Amoung Win", "Amoung Loss", "Avg Win", "Avg Loss",
-                                        "Best Trade", "Worse Trade", "Profit Factor"]
-                               )
+        self.df = pd.DataFrame(index=Metric.INDEX_VALUES)
+
+    @staticmethod
+    def calculate_product(r):
+        return (1 + r).prod()
     
-    def pnl(self, r):
-        x = (1 + r).prod()
-        return x    
-    
-    def average(self, r):
-        if len(r) == 0:
-            return 0
-        else:
-            x = (1+r).prod()
-            return x**(1/len(r))
-    
-    def expectancy(self, win_rate, avg_win, avg_loss):
-        return win_rate*avg_win + (1 - win_rate)*avg_loss    
-    
-    def sharpe_ratio(self):
-        mean = (1+r).prod()
+    @staticmethod
+    def average(r):
+        return 0 if len(r) == 0 else Metric.calculate_product(r) ** (1 / len(r))
+
+    @staticmethod
+    def expectancy(winRate, avgWin, avgLoss):
+        return winRate * avgWin + (1 - winRate) * avgLoss
+
+    @staticmethod
+    def sharpe_ratio(r):
+        mean = Metric.calculate_product(r)
         std = np.std(r)
         return mean / std
-    
-    
-    def kurtosis(self, r, n = 8):
-        if len(r) > n:
-            return scipy.stats.kurtosis(r)
-        else:
-            return 0
 
-    def skewness(self, r, n = 8):
-        if len(r) > n:
-            return scipy.stats.skew(r)
-        else:
-            return 0
-    
-    
-    def excecute(self, trade):
+    @staticmethod
+    def calculate_kurtosis(r, n=8):
+        return scipy.stats.kurtosis(r) if len(r) > n else 0
+
+    @staticmethod
+    def calculate_skewness(r, n=8):
+        return scipy.stats.skew(r) if len(r) > n else 0
+        
+
+    def execute(self, trade):
         metrics = {}
         try:
             self.date = str(trade.index[-1])
         except IndexError:
             self.date = None
-        
-        loc = np.where((trade['status'] == "close"))
-        n_trades = len(loc[0])
-        loc = np.where((trade['status'] == "close") & (trade.pnl > 0))
-        win_trades = len(loc[0])
-        loc = np.where((trade['status'] == "close") & (trade.pnl <= 0))
-        loss_trades = len(loc[0])
-        
-        try:
-            win_rate = win_trades / n_trades
-        except ZeroDivisionError:
-            win_rate = 0
-        try:
-            loss_rate = loss_trades / n_trades
-        except ZeroDivisionError:
-            loss_rate = 0
-        
-        loc = np.where(trade['gp'] != 0)
-        avg_gp = trade.iloc[loc]["gp"].mean()
-        amoung_win = trade.loc[trade['gp'] > 0, "gp"].sum()
-        amoung_loss = trade.loc[trade['gp'] <= 0, "gp"].sum()
-        
-        trade_ = trade.iloc[loc]
-        avg_win = trade_.loc[trade_['gp'] > 0, "gp" ].mean()
-        avg_loss = trade_.loc[trade_['gp'] <= 0, "gp" ].mean()
-        profit_factor = amoung_win / abs(amoung_loss)
-        
-        total_pnl = trade.gp.sum()
-        exp = self.expectancy(win_rate = win_rate,
-                                   avg_win = avg_win,
-                                   avg_loss = avg_loss)
-        
-        keys = ["Total Trades", "Total Pnl", "Win Rate", "Expentancy",
-                "Amoung Win", "Amoung Loss", "Avg Win", "Avg Loss", "Profit Factor"]
-        
-        values = [n_trades, total_pnl, win_rate, exp, 
-                  amoung_win, amoung_loss, avg_win, avg_loss,
-                  profit_factor]
-        
-        for key, value in zip(keys, values):
-            metrics[key] = value
-        
+
+        closed_trades = trade[trade['status'] == "close"]
+        nbTrades = len(closed_trades)
+        winTrades = len(closed_trades[closed_trades.pnl > 0])
+        lossTrades = len(closed_trades[closed_trades.pnl <= 0])
+
+        winRate = winTrades / nbTrades if nbTrades > 0 else 0
+        lossRate = lossTrades / nbTrades if nbTrades > 0 else 0
+
+        gp_not_zero = trade[trade['gp'] != 0]
+        avgGp = gp_not_zero["gp"].mean()
+        amountWin = gp_not_zero[gp_not_zero['gp'] > 0]["gp"].sum()
+        amountLoss = gp_not_zero[gp_not_zero['gp'] <= 0]["gp"].sum()
+
+        avgWin = gp_not_zero[gp_not_zero['gp'] > 0]["gp"].mean()
+        avgLoss = gp_not_zero[gp_not_zero['gp'] <= 0]["gp"].mean()
+
+        profitFactor = amountWin / abs(amountLoss)
+
+        totalPnl = trade['gp'].sum()
+        expectancy = Metric.expectancy(winRate, avgWin, avgLoss)
+
+        metrics = {
+            "totalTrades": nbTrades,
+            "totalPnl": totalPnl,
+            "winRate": winRate,
+            "lossRate": lossRate,
+            "Expectancy": expectancy,
+            "amountWin": amountWin,
+            "amountLoss": amountLoss,
+            "avgWin": avgWin,
+            "avgLoss": avgLoss,
+            "profitFactor": profitFactor,
+        }
         return metrics
-        
-        
-        
+
+
+
+
+

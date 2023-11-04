@@ -63,18 +63,17 @@ class Env:
         return {"portfolio" : portfolio, "indicator" : indicator}
     
     
-    def execute(self, asset, price, signal_action, risk_action, test_state):
+    def execute(self, asset, price, signal_action, risk_action, paper_mode):
         current_state = (asset.state, asset.type, asset.tp, asset.sl)
-        next_state = signal_action["state"]
         
-        fsm = FSM(current_state, next_state, signal_action, risk_action, test_state)
+        fsm = FSM(current_state, signal_action, risk_action, paper_mode)
         fsm.perform(asset=asset, price=price, portfolio=self.future_portfolio)
         
     
-    def step(self, agentId, asset, event, signal_action, risk_action, test_state = True):
+    def step(self, agentId, asset, event, signal_action, risk_action, paper_mode = True):
         reward = 0
         self.execute(asset = asset, price = event.price,
-                     signal_action = signal_action, risk_action = risk_action, test_state=test_state)
+                     signal_action = signal_action, risk_action = risk_action, paper_mode=paper_mode)
         
         self.future_portfolio.update(asset = asset)
         self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
@@ -94,11 +93,13 @@ class Env:
     
     
     def update_indicator(self):
-        ""
+        self.process()
+        
     
     
     def get_report(self, agentId, symbol):
         self.process()
+        
         self.report.load(self.trades, self.portfolios)
         
         fig0, fig1 = self.report.benchmark(agentId, symbol)
@@ -109,8 +110,7 @@ class Env:
         
         fig1.show()
         
-        
-        #fig2 = self.report.plot_portfolio(self.agentId)
+       #fig2 = self.report.plot_portfolio(self.agentId)
         #fig2.show()
         
     

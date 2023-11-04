@@ -28,7 +28,7 @@ class Asset:
     def get_value(self, price):
         return self.in_value + self.get_pnl(price)
     
-    def get_state(self, state):
+    def update_state(self, state):
         self.state = state
     
     def update(self, price, quantity = 0):

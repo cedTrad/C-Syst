@@ -10,17 +10,17 @@ STATE = [
 
 class FSM:
     
-    def __init__(self, current_state, next_state, signal_action, risk_action, test_state):
+    def __init__(self, current_state, signal_action, risk_action, paper_mode):
         self.current_state = current_state
-        self.next_state = next_state
         
         self.signal_action = signal_action
         self.risk_action = risk_action
-        self.oms = OMS(test = test_state)
+        self.oms = OMS(paper_mode = paper_mode)
         
         
     def actuator(self, portfolio, asset, price):
-        asset.get_state(state = self.signal_action["state"])
+        next_asset_side = self.signal_action["state"]
+        asset.update_state(state = next_asset_side)
         
         if self.signal_action["state"][:2] == ("Open", "LONG"):
             response = self.oms.order.open_long(asset, price, quantity = self.risk_action["quantity"])
