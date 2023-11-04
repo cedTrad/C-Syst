@@ -99,6 +99,7 @@ class Env:
     
     def get_report(self, agentId, symbol):
         self.process()
+        self.metrics = self.postprocessor.for_report(agentId=agentId)
         
         self.report.load(self.trades, self.portfolios)
         

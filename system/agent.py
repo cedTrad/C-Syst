@@ -37,15 +37,15 @@ class Agent:
         
     
     def act(self, state):
-        signal_action, risk_action = self.policy.perform(batchData = self.batchData, portfolio = state["portfolio"],
+        signalAction, riskAction = self.policy.perform(batchData = self.batchData, portfolio = state["portfolio"],
                                                        current_asset_position = self.asset.position)
-        return signal_action, risk_action
+        return signalAction, riskAction
     
     
     def update(self, state):
         event = self.get_event()
-        signal_action, risk_action = self.act(state)
-        next_state, reward = self.env.step(self.agentId, self.asset, event, signal_action, risk_action)
+        signalAction, riskAction = self.act(state)
+        next_state, reward = self.env.step(self.agentId, self.asset, event, signalAction, riskAction)
         return next_state, reward, event
     
     
@@ -72,9 +72,6 @@ class Agent:
             except StopIteration:
                 break
                 
-            #if "Close" in self.asset.state:
-            #    self.post_trade(event=event, close_trade=True)
-    
     
     def learn(self):
         ""

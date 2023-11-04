@@ -53,6 +53,7 @@ class FSM:
     def callback_actuator(self):
         ""
     
+    
     def predicate(self, portfolio, min_amount = 20):
         if "Open" in self.signal_action:
             if self.risk_action.get("amount") <= min_amount:

@@ -70,6 +70,7 @@ class Metric:
         expectancy = Metric.expectancy(winRate, avgWin, avgLoss)
 
         metrics = {
+            "date" : self.date,
             "totalTrades": nbTrades,
             "totalPnl": totalPnl,
             "winRate": winRate,

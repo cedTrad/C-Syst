@@ -50,8 +50,8 @@ class Politic:
     def perform(self, batchData, portfolio, current_asset_position):
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
         
-        signal_action = {}
-        risk_action = {}
+        signalAction = {}
+        riskAction = {}
         
         price = batchData.iloc[-1]["close"]
         signal = self.get_signal(batchData)
@@ -59,26 +59,24 @@ class Politic:
         sl = False
         tp = False
         
-        canOpenPosition, side = Transition(signal, current_asset_position).get_in()
-        canclosePosition, side = Transition(signal, current_asset_position).get_out()
+        canOpenPosition, sideIn = Transition(signal, current_asset_position).get_in()
+        canClosePosition, sideOut = Transition(signal, current_asset_position).get_out()
         skip, _ = Transition(signal, current_asset_position).get_skip()
-    
         
         if canOpenPosition:
-            signal_action.update({"state" : side + (sl, tp)})
-            
+            signalAction.update({"state" : sideIn + (sl, tp)})
             leverage = 1
             amount = self.risk_policy(available_amount = available_amount, current_status="Open")
             quantity = amount / price
-            risk_action.update({"amount" : amount, "quantity" : quantity, "leverage" : leverage})
+            riskAction.update({"amount" : amount, "quantity" : quantity, "leverage" : leverage})
         
-        elif canclosePosition:
-            signal_action.update({"state" : side + (sl, tp)})
+        elif canClosePosition:
+            signalAction.update({"state" : sideOut + (sl, tp)})
         
         else:
-            signal_action.update({"state" : ("-", signal, sl, tp)})
+            signalAction.update({"state" : ("-", signal, sl, tp)})
             
-        return signal_action, risk_action
+        return signalAction, riskAction
 
     
   

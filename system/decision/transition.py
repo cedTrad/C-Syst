@@ -1,7 +1,7 @@
 
 class Transition:
     
-    def __init__(self, signal, current_asset_position):
+    def __init__(self, signal, current_asset_position : int):
         self.signal = signal
         self.current_asset_position = current_asset_position
         
