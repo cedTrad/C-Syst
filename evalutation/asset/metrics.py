@@ -2,18 +2,20 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
+
+
 class Metric:
     
-    INDEX_VALUES = [
-        "equityInitial", "totalTrades", "totalPnl", "winRate",
-        "Expectancy", "equityFinal", "equityPeak",
-        "amountWin", "amountLoss", "avgWin", "avgLoss",
-        "bestTrade", "worstTrade", "profitFactor"
-    ]
+    def __init__(self, tradesData):
+        self.tradesData = tradesData
+        self.nbTrades = 0
+        self.winTrades = 0
+        self.lossTrades = 0
+        
+        self.amoungWin = []
+        self.amoungLoss = []
+        
     
-    def __init__(self):
-        self.df = pd.DataFrame(index=Metric.INDEX_VALUES)
-
     @staticmethod
     def calculate_product(r):
         return (1 + r).prod()
@@ -21,17 +23,7 @@ class Metric:
     @staticmethod
     def average(r):
         return 0 if len(r) == 0 else Metric.calculate_product(r) ** (1 / len(r))
-
-    @staticmethod
-    def expectancy(winRate, avgWin, avgLoss):
-        return winRate * avgWin + (1 - winRate) * avgLoss
-
-    @staticmethod
-    def sharpe_ratio(r):
-        mean = Metric.calculate_product(r)
-        std = np.std(r)
-        return mean / std
-
+    
     @staticmethod
     def calculate_kurtosis(r, n=8):
         return scipy.stats.kurtosis(r) if len(r) > n else 0
@@ -39,52 +31,53 @@ class Metric:
     @staticmethod
     def calculate_skewness(r, n=8):
         return scipy.stats.skew(r) if len(r) > n else 0
-        
-
-    def execute(self, trade):
-        metrics = {}
-        try:
-            self.date = str(trade.index[-1])
-        except IndexError:
-            self.date = None
-
-        closed_trades = trade[trade['status'] == "close"]
-        nbTrades = len(closed_trades)
-        winTrades = len(closed_trades[closed_trades.pnl > 0])
-        lossTrades = len(closed_trades[closed_trades.pnl <= 0])
-
-        winRate = winTrades / nbTrades if nbTrades > 0 else 0
-        lossRate = lossTrades / nbTrades if nbTrades > 0 else 0
-
-        gp_not_zero = trade[trade['gp'] != 0]
-        avgGp = gp_not_zero["gp"].mean()
-        amountWin = gp_not_zero[gp_not_zero['gp'] > 0]["gp"].sum()
-        amountLoss = gp_not_zero[gp_not_zero['gp'] <= 0]["gp"].sum()
-
-        avgWin = gp_not_zero[gp_not_zero['gp'] > 0]["gp"].mean()
-        avgLoss = gp_not_zero[gp_not_zero['gp'] <= 0]["gp"].mean()
-
-        profitFactor = amountWin / abs(amountLoss)
-
-        totalPnl = trade['gp'].sum()
-        expectancy = Metric.expectancy(winRate, avgWin, avgLoss)
-
-        metrics = {
-            "date" : self.date,
-            "totalTrades": nbTrades,
-            "totalPnl": totalPnl,
-            "winRate": winRate,
-            "lossRate": lossRate,
-            "Expectancy": expectancy,
-            "amountWin": amountWin,
-            "amountLoss": amountLoss,
-            "avgWin": avgWin,
-            "avgLoss": avgLoss,
-            "profitFactor": profitFactor,
-        }
-        return metrics
-
-
-
-
-
+    
+    @staticmethod
+    def expectancy(winRate, avgWin, avgLoss):
+        return winRate * avgWin + (1 - winRate) * avgLoss
+    
+    staticmethod
+    def sharpe_ratio(r):
+        mean = Metric.calculate_product(r)
+        std = np.std(r)
+        return mean / std
+    
+    
+    def update(self):
+        i = j = 0
+        while True:
+            j += 1
+            data = self.tradesData.iloc[i : j+1]
+            if self.tradesData.iloc[j]["status"] == "Close":
+                i = j+1
+                date = self.tradesData.index[j]
+                self.nbTrades += 1
+                pnl = self.tradesData.iloc[j]["pnl"]
+                
+                if pnl > 0:
+                    self.winTrades += 1
+                    self.amoungWin.append(pnl)
+                    self.amoungLoss.append(0)
+                    
+                else:
+                    self.lossTrades += 1
+                    self.amoungWin.append(0)
+                    self.amoungLoss.append(pnl)
+                    
+                winRate = self.winTrades / self.nbTrades
+                avgWin = np.mean(self.amoungWin)
+                avgLoss = np.mean(self.amoungLoss)
+                expectancy = Metric.expectancy(winRate = winRate , avgWin = avgWin, avgLoss = avgLoss)
+                
+                profitFactor = np.sum(self.amoungWin) / np.sum(self.amoungLoss)*(-1)
+                
+                metric = {
+                    "date" : date,
+                    "nbTrades" : self.nbTrades,
+                    "winRate" : winRate,
+                    "expectancy" : expectancy,
+                    "profitFactor" : profitFactor,
+                }
+                yield metric
+                
+                
