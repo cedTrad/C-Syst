@@ -1,13 +1,13 @@
+from typing import Any
 from evalutation.asset.processing import Processing    
 from evalutation.asset.metrics import Metric
 
 from evalutation.portfolio.processing import Processing as PProcessing
-
-
+        
+                
 class Postprocessor:
     
     def __init__(self):
-        self.metric = Metric()
         self.processAsset = Processing()
         self.processPort = PProcessing()
     
@@ -21,10 +21,23 @@ class Postprocessor:
         return self.trades, self.portfolios, tradesData, portfolioData
     
     
-    def update_indicator(self, agentId):
-        trades = self.trades[agentId]
-        indicators = self.metric.excecute(trade = trades)
-        return indicators
+    def gen_data(self, agentId):
+        return Metric(self.trades[agentId]).update()
     
     
-
+    def update_metric(self, agentId):
+        metrics = []
+        metric = self.gen_data(agentId)
+        while True:
+            try:
+                metrics.append(
+                    next(metric)
+                    )
+                
+            except (StopIteration, IndexError):
+                break
+            
+        return metrics
+    
+    
+    

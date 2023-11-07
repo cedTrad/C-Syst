@@ -58,11 +58,11 @@ class OrderTest:
 
 class OMS:
     
-    def __init__(self, test = True):
-        if test:
+    def __init__(self, paper_mode = True):
+        if paper_mode:
             self.order = OrderTest()
         else:
-            self.order = Order
+            self.order = OrderAPI
         self.long = []
         self.short = []
         

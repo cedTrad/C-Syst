@@ -1,44 +1,39 @@
 
 class Transition:
     
-    def __init__(self, signal, current_asset_position):
+    def __init__(self, signal, current_asset_position : int):
         self.signal = signal
         self.current_asset_position = current_asset_position
         
     def get_in(self):
         if self.current_asset_position == 0 and self.signal == "LONG":
-            return ("Open", "LONG")
+            return True, ("Open", "LONG")
         elif self.current_asset_position == 0 and self.signal == "SHORT":
-            return ("Open", "SHORT")
+            return True, ("Open", "SHORT")
         else:
-            return False
+            return False, ("", "")
 
         
     def get_out(self):
         if self.current_asset_position == 1 and self.signal is None:
-            return ("Close", "LONG")
+            return True, ("Close", "LONG")
         elif self.current_asset_position == -1 and self.signal is None:
-            return ("Close", "SHORT")
+            return True, ("Close", "SHORT")
         elif self.current_asset_position == -1 and self.signal == "LONG":
-            return ("Close", "SHORT")
+            return True, ("Close", "SHORT")
         elif self.current_asset_position == 1 and self.signal == "SHORT":
-            return ("Close", "LONG")
+            return True, ("Close", "LONG")
         else:
-            return False
+            return False, ("", "")
         
         
     def get_skip(self):
         if self.signal == "LONG" and self.current_asset_position == 1:
-            return ("-", "LONG")
+            return True, ("-", "LONG")
         elif self.signal == "SHORT" and self.current_asset_position == -1:
-            return ("-", "SHORT")
+            return True, ("-", "SHORT")
         else:
-            return False
-        
-    def perform(self):
-        self.get_in()
-        self.get_out()
-        
-        self.get_pass()
+            return False, ("", "")
+
         
         

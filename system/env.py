@@ -7,14 +7,15 @@ from evalutation.postprocessor import Postprocessor
 
 from dataEngine.journal import Journal
 
-signal_action = ["Open", "Close", "Resize", "-", None]
-risk_action = ["quantity", "leverage", "closePrice", "sl", "tp"]
+signalAction = ["Open", "Close", "Resize", "-", None]
+riskAction = ["quantity", "leverage", "closePrice", "sl", "tp"]
 
 
 
 class PFuture(Portfolio):    
     def __init__(self, name, capital):
-        Portfolio.__init__(self, name, capital)
+        #Portfolio.__init__(self, name, capital)
+        super().__init__(name, capital)
         self.long = {}
         self.short = {}
         self.long_portfolio = 0
@@ -37,6 +38,8 @@ class Env:
         self.journal = Journal()
         self.future_portfolio = PFuture("Binance", capital)
         self.market = Market(start = start, end = end, interval = interval)
+        
+        self.metrics = {}
         
         self.init_portfolio()
         self.postprocessor = Postprocessor()
@@ -63,25 +66,24 @@ class Env:
         return {"portfolio" : portfolio, "indicator" : indicator}
     
     
-    def execute(self, asset, price, signal_action, risk_action, test_state):
+    def execute(self, asset, price, signalAction, riskAction, paper_mode):
         current_state = (asset.state, asset.type, asset.tp, asset.sl)
-        next_state = signal_action["state"]
         
-        fsm = FSM(current_state, next_state, signal_action, risk_action, test_state)
+        fsm = FSM(current_state, signalAction, riskAction, paper_mode)
         fsm.perform(asset=asset, price=price, portfolio=self.future_portfolio)
         
     
-    def step(self, agentId, asset, event, signal_action, risk_action, test_state = True):
+    def step(self, agentId, asset, event, signalAction, riskAction, paper_mode = True):
         reward = 0
         self.execute(asset = asset, price = event.price,
-                     signal_action = signal_action, risk_action = risk_action, test_state=test_state)
+                     signalAction = signalAction, riskAction = riskAction, paper_mode=paper_mode)
         
         self.future_portfolio.update(asset = asset)
         self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
                               asset = asset, portfolio = self.future_portfolio)
         
         state = self.get_state()
-        if "Close" in signal_action["state"]:
+        if "Close" in signalAction["state"]:
             reward = asset.pnl
         
         return state, reward
@@ -94,10 +96,13 @@ class Env:
     
     
     def update_indicator(self):
-        ""
+        self.process()
+        for agentId in self.agentIds:
+            self.metrics[agentId] = self.postprocessor.update_metric(agentId)
+        
     
     
-    def get_report(self, agentId, symbol):
+    def get_viz(self, agentId, symbol):
         self.process()
         self.report.load(self.trades, self.portfolios)
         
@@ -109,13 +114,11 @@ class Env:
         
         fig1.show()
         
-        
-        #fig2 = self.report.plot_portfolio(self.agentId)
-        #fig2.show()
-        
     
     
     def globalReport(self):
+        self.process()
+        
         self.report.load(self.trades, self.portfolios)
         fig_e, fig_p = self.report.compare()
         
