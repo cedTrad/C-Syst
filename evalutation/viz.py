@@ -57,7 +57,6 @@ class VizBenchmark:
     
     
         
-        
 
 class VizAsset:
     
@@ -115,7 +114,7 @@ class VizRisk:
 
 
 
-class CompareViz:
+class GlobalViz:
     
     def __init__(self, agentIds, trades : dict, portfolios : dict):
         self.agentIds = agentIds

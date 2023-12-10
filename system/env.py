@@ -2,8 +2,7 @@ from .base import Portfolio, Asset
 from .fsm import FSM
 from .market import Market
 
-from evalutation.reporting import Reporting
-from evalutation.postprocessor import Postprocessor
+from evalutation.reporting import GReport, IReport
 
 from dataEngine.journal import Journal
 
@@ -42,17 +41,12 @@ class Env:
         self.metrics = {}
         
         self.init_portfolio()
-        self.postprocessor = Postprocessor()
+        
         
         
     def init_portfolio(self):
         for symbol in self.symbols:
             self.future_portfolio.add_asset(symbol)
-            
-    
-    def config_agents(self, agentIds):
-        self.agentIds = agentIds
-        self.report = Reporting(agentIds, db=self.market.db)
     
     
     def get_state(self):
@@ -89,27 +83,25 @@ class Env:
         return state, reward
     
     
-    def process(self):
-        tradesData = self.journal.tradesData
-        portfolioData = self.journal.portfolioData
-        self.trades, self.portfolios, self.tradesData, self.portfolioData = self.postprocessor.load(tradesData, portfolioData)
+    def config_agents(self, agentIds):
+        self.agentIds = agentIds
+        self.greport = GReport(agentIds, db=self.market.db)
     
     
-    def update_indicator(self):
-        self.process()
-        for agentId in self.agentIds:
-            self.metrics[agentId] = self.postprocessor.update_metric(agentId)
+    def pos_data(self):
+        self.tradesData, self.portfolioData = self.journal.tradesData, self.journal.portfolioData
         
-    
     
     def get_viz(self, agentId, symbol):
-        self.process()
-        self.report.load(self.trades, self.portfolios)
+        self.pos_data()
+        self.ireport = IReport(agentId, db=self.market.db)
         
-        fig0, fig1 = self.report.benchmark(agentId, symbol)
+        self.ireport.load(self.tradesData, self.portfolioData)
+        
+        fig0, fig1 = self.ireport.benchmark(symbol)
         fig0.show()
         
-        fig = self.report.plot_asset(agentId, symbol)
+        fig = self.ireport.plot_asset(symbol)
         fig.show()
         
         fig1.show()
@@ -117,13 +109,11 @@ class Env:
     
     
     def globalReport(self):
-        self.process()
-        
-        self.report.load(self.trades, self.portfolios)
-        fig_e, fig_p = self.report.compare()
+        self.pos_data()
+        self.greport.load(self.tradesData, self.portfolioData)
+        fig_e = self.greport.compare()
         
         fig_e.show()
-        fig_p.show()
         
     
     
