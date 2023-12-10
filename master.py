@@ -27,20 +27,22 @@ class MasterAgentThread(Thread):
                 self.condition.notify_all()
                 print("Master a tous les agents , Activez-vous")
                 
-                
                 while all([msg for msg in self.agent_msg.values()]) is False:
                     print("Waiting for agents ... ")
+                    print(f"all msg : {self.agent_msg}")
                     self.condition.wait()
                 
                 print(f" ooo__oooo=> : {self.agent_msg}")
-                stop_condition = self.agent_msg == {self.agentList[0] : "stop", self.agentList[1] : "stop"}
+                stop_condition = self.agent_msg == {agent : "stop" for agent in self.agentList}
                 print(f"stop condition : {stop_condition}")
                 if stop_condition:
                     print("---------- STOP(Boss) ----------")
                     break
-                    
                 
-                self.agent_msg.update({self.agentList[0] : None, self.agentList[1] : None})
+                #self.agent_msg.update({self.agentList[0] : None, self.agentList[1] : None})
+                self.agent_msg.update(
+                    {agent : None for agent in self.agentList}
+                )
                 
                 
     def global_report(self):
