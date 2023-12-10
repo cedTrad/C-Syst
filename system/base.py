@@ -21,7 +21,6 @@ class Asset:
     def get_pnl(self, price):
         if self.state[1] == ("SHORT"):
             return self.in_value - abs(self.quantity * price)
-        
         return abs(self.quantity * price) - self.in_value
     
     

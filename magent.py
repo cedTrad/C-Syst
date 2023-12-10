@@ -22,13 +22,12 @@ class MAgentThread(Agent, Thread):
         while True:    
             with self.condition:
                 while self.master_msg.get(self.agentId) is None:
-                    print(f"{self.agentId} en attente des ordres du master ... ")
+                    print(f"{self.agentId} waiting master's signal ... ")
                     self.condition.wait()
                 
-                print(f"{self.agentId} en cours d'execution ... ")
-                print(f"======> {self.master_msg.get(self.agentId)}")
+                print(f"{self.agentId} get master signal ... ")
                 boss_msg = self.master_msg.pop(self.agentId, None)
-                print(f"___ msg : {boss_msg}")
+                print(f"{self.agentId}- Master signal : {boss_msg}")
                 
                 try:
                     next_state, reward, event = self.update(state)
@@ -43,7 +42,7 @@ class MAgentThread(Agent, Thread):
                         
                 print(f"{self.agentId} - date : {event.date}, {self.symbol}")
                 
-                self.agent_msg.update({self.agentId : "order placed ... "})
+                self.agent_msg.update({self.agentId : "action executed ... "})
                 
                 self.condition.notify()
             

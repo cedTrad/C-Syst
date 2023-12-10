@@ -17,6 +17,8 @@ class MasterAgentThread(Thread):
     def addAgent(self, agentId):
         self.agentList.append(agentId)
     
+    def fitness(self):
+        ""
     
     def run(self):
         while True:
@@ -25,21 +27,19 @@ class MasterAgentThread(Thread):
                 for agentId in self.agentList:
                     self.master_msg.update({agentId : "Place an Order ... "})
                 self.condition.notify_all()
-                print("Master a tous les agents , Activez-vous")
+                print("Let's go ... ")
                 
                 while all([msg for msg in self.agent_msg.values()]) is False:
-                    print("Waiting for agents ... ")
-                    print(f"all msg : {self.agent_msg}")
+                    print("Master are waiting for agents ... ")
+                    print(f"{self.agent_msg}")
                     self.condition.wait()
                 
-                print(f" ooo__oooo=> : {self.agent_msg}")
+                print(f" tracking ... : {self.agent_msg}")
                 stop_condition = self.agent_msg == {agent : "stop" for agent in self.agentList}
-                print(f"stop condition : {stop_condition}")
                 if stop_condition:
                     print("---------- STOP(Boss) ----------")
                     break
                 
-                #self.agent_msg.update({self.agentList[0] : None, self.agentList[1] : None})
                 self.agent_msg.update(
                     {agent : None for agent in self.agentList}
                 )
