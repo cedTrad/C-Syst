@@ -40,14 +40,16 @@ class MasterAgentThread(Thread):
                 print(f"{self.master_bus}")
                 
                 #while all([msg for msg in self.agent_bus["msg"].values()]) is False:
-                while self.is_running(self.agent_bus):
+                while self.is_all_running(self.agent_bus):
                     print("Master are waiting for agents ... ")
                     print(f"{self.agent_bus}")
                     self.condition.wait()
                 
-                stop_condition = 'stop' in self.agent_bus["msg"].values()
-                print(f"Stop condition : {stop_condition}")
-                if stop_condition:
+                if self.agent_bus["stop"]:
+                    self.master_bus["stop"] = True
+                
+                print(f" 2- {self.master_bus}")
+                if self.master_bus["stop"]:
                     print("---------- STOP(Boss) ----------")
                     break
                 

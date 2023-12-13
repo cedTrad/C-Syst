@@ -47,23 +47,23 @@ class MAgentThread(Agent, Thread):
                         print("date : ",event.date)
 
                 except StopIteration:
-                    #self.agent_bus["msg"].update({self.agentId : "stop"})
+                    print(f"{self.agentId} stop iterration")
                     self.agent_bus.update({"stop" : True})
                     print(f"---------- STOP {self.agentId}----------")
-                    stop = True
-                    self.master_bus.update({"stop" : True}) 
+                    #self.master_bus.update({"stop" : True})
                     self.condition.notify()
                     
-                    break
+                    #break
                 
                 self.agent_bus["msg"].update({self.agentId : "action executed ... "})
                 self.condition.notify()
             
             self.barrier.wait()
             
-            if self.agent_bus.get("stop") is True:
-                print(f"{self.agentId} STOP")
+            if self.master_bus["stop"] or self.agent_bus["stop"]:
+                print(f"--- STOP {self.agentId} ----")
                 break
-        
+            
+
         
 
