@@ -3,44 +3,59 @@ from threading import Thread, Condition, Event
 
 class MasterAgentThread(Thread):
     
-    def __init__(self, condition, activeAgent, agent_msg, master_msg):
+    def __init__(self, condition, activeAgent, agent_bus, master_bus):
         Thread.__init__(self)
         self.activeAgent = activeAgent
         self.agentList = []
         
         self.condition = condition
         
-        self.agent_msg = agent_msg
-        self.master_msg = master_msg
+        self.agent_bus = agent_bus
+        self.master_bus = master_bus
     
     
     def addAgent(self, agentId):
         self.agentList.append(agentId)
     
     
+    def is_all_running(self, agent_bus):
+        msg = agent_bus["running"].values()
+        return all(msg)
+        
+        
+    def fitness(self):
+        ""
+    
     def run(self):
         while True:
             with self.condition:
                 print("**** Master ****")
                 for agentId in self.agentList:
-                    self.master_msg.update({agentId : "Place an Order ... "})
+                    self.master_bus["agent"].update({agentId : "Start work ..."})
+                
+                self.master_bus.update({"activeAgent" : 1})
                 self.condition.notify_all()
-                print("Master a tous les agents , Activez-vous")
                 
+                print("Let's go ... ")
+                print(f"{self.master_bus}")
                 
-                while all([msg for msg in self.agent_msg.values()]) is False:
-                    print("Waiting for agents ... ")
+                #while all([msg for msg in self.agent_bus["msg"].values()]) is False:
+                while self.is_all_running(self.agent_bus):
+                    print("Master are waiting for agents ... ")
+                    print(f"{self.agent_bus}")
                     self.condition.wait()
                 
-                print(f" ooo__oooo=> : {self.agent_msg}")
-                stop_condition = self.agent_msg == {self.agentList[0] : "stop", self.agentList[1] : "stop"}
-                print(f"stop condition : {stop_condition}")
-                if stop_condition:
+                if self.agent_bus["stop"]:
+                    self.master_bus["stop"] = True
+                
+                print(f" 2- {self.master_bus}")
+                if self.master_bus["stop"]:
                     print("---------- STOP(Boss) ----------")
                     break
-                    
                 
-                self.agent_msg.update({self.agentList[0] : None, self.agentList[1] : None})
+                self.agent_bus["msg"].update(
+                    {agent : None for agent in self.agentList}
+                )
                 
                 
     def global_report(self):
