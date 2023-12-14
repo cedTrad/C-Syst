@@ -17,16 +17,16 @@ class MasterAgentThread(Thread):
     def addAgent(self, agentId):
         self.agentList.append(agentId)
     
-    def start(self, msg = "start"):
+    def active_agents(self, msg = "start"):
         for agentId in self.agentList:
-            self.master_bus["agent"].update({agentId : "Start work ..."})
+            self.master_bus["msg"].update({agentId : "Start work ..."})
         
     def select_active_agent(self, activeAgent = 1):
         self.master_bus.update({"activeAgent" : activeAgent})
     
-    def is_all_running(self):
-        msg = self.agent_bus["running"].values()
-        return all(msg)
+    def wait_agent_finish_step(self):
+        msg = self.agent_bus["fstep"].values()
+        return not all(msg)
     
     def get_agent_report(self):
         return {agentId : self.agent_bus["msg"].pop(agentId, None) for agentId in self.agentList}
@@ -47,17 +47,15 @@ class MasterAgentThread(Thread):
             with self.condition:
                 
                 # Start simulation
-                print("**** Master ****")
-                self.start()
-                self.select_active_agent()
+                print(" ---------------   Master : Let's go ... ")
+                self.active_agents()
+                self.select_active_agent(1)
                 
                 self.condition.notify_all()
-                
-                print("Let's go ... ")
                 print(f"master_bus : {self.master_bus}")
                 
-                
-                while self.is_all_running():
+                # Wait agents finish thier tasks
+                while self.wait_agent_finish_step():
                     print("Master are waiting for agents finish to execute thier work ... ")
                     print(f" agent_bus : {self.agent_bus}")
                     self.condition.wait()
@@ -65,27 +63,14 @@ class MasterAgentThread(Thread):
                 # After all agents execute their work
                 # get agent msg
                 agentData = self.get_agent_report()
+                print(f"Agent report {agentData}")
                 
                 # Decision for next step
                 self.analyse_report(agentData)
                 
                 # Stop simulation
-                
                 if self.agent_bus["stop"]:
                     self.master_bus["stop"] = True
                 
-                print(f" 2- {self.master_bus}")
-                if self.master_bus["stop"]:
-                    print("---------- STOP(Boss) ----------")
-                    break
-                
-                self.agent_bus["msg"].update(
-                    {agent : None for agent in self.agentList}
-                )
-                
-                
-    def global_report(self):
-        ""
-                
-            
+
             

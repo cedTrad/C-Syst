@@ -17,23 +17,23 @@ class MAgentThread(Agent, Thread):
         
     
     def get_master_bus(self):
-        msg = self.master_bus["agent"].pop(self.agentId, None)
+        msg = self.master_bus["msg"].pop(self.agentId, None)
         stop = self.master_bus["stop"]
-        return msg, stop
+        active = self.master_bus["activeAgent"] == self.agentId
+        return msg, stop, active
     
-    def is_active(self):
-        return self.master_bus["activeAgent"] == self.agentId
     
-    def execute_master_order(self, state):
-        if self.is_active():
+    def execute_master_order(self, state, active):
+        if active:
             next_state, reward, event = self.update(state)
             state = next_state
             return state, reward, event, True
         else:
             return state, None, None, False
     
-    def report_to_master(self):
+    def report_to_master(self, data, finish_step):
         self.agent_bus["msg"].update({self.agentId : "action executed ... "})
+        self.agent_bus["fstep"].update({self.agentId : finish_step})
         
         
     def end_simulation(self, currentDate):
@@ -44,31 +44,36 @@ class MAgentThread(Agent, Thread):
         if self.agent_bus["stop"] or self.master_bus["stop"]:
             return True
     
-    
+        
     def run(self):
         state = self.env.reset()
         
-        while True:    
+        while True:
             with self.condition:
                 
                 # Waitting master order
-                while self.master_bus["agent"].get(self.agentId) is None:
+                while self.master_bus["msg"].get(self.agentId) is None:
                     print(f"{self.agentId} waiting master's signal ... ")
                     self.condition.wait()
                 
                 # Get master msg (msg , stop)
-                master_msg = self.get_master_bus()
+                master_msg, master_status, active = self.get_master_bus()
                 print(f"{self.agentId} - Master signal : {master_msg[0]}")
                 
                 # Execute order
-                state, reward, event, is_executed = self.execute_master_order(state)
-                self.end_simulation(event.date)
+                state, reward, event, is_executed = self.execute_master_order(state, active)
+                if is_executed:
+                    print(f"{self.agentId} execute order")
                 
                 # Report to master
-                self.report_to_master()
+                self.report_to_master(data="", finish_step = True)
                 
-                stop = self.end_simulation(event.date)
+                # Signal to stop simulation
+                stop = self.end_simulation(event.date) if event is not None else False
+                
+                # Notify master
                 self.condition.notify()
+                print(f"{self.agentId} has finished step")
             
             # Wait other agents to the barrier
             self.barrier.wait()
