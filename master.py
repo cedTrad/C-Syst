@@ -69,8 +69,8 @@ class MasterAgentThread(Thread):
                 self.analyse_report(agentData)
                 
                 # Stop simulation
-                if self.agent_bus["stop"]:
-                    self.master_bus["stop"] = True
+                if self.stop_simulation:
+                    break
                 
 
             

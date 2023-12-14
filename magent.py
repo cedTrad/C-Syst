@@ -1,6 +1,7 @@
 from threading import Thread
 from system.agent import Agent
 
+from datetime import datetime
 
 class MAgentThread(Agent, Thread):
     
@@ -36,13 +37,16 @@ class MAgentThread(Agent, Thread):
         self.agent_bus["fstep"].update({self.agentId : finish_step})
         
         
-    def end_simulation(self, currentDate):
-        if currentDate == self.env.end:
+    def stop_simulation(self, currentDate):
+        endDate = self.env.end
+        date = datetime.strptime(endDate, "%Y-%m-%d %H:%M:%S")
+        
+        if currentDate == date:
             self.agent_bus["stop"] = True
             self.master_bus["stop"] = True
-        
-        if self.agent_bus["stop"] or self.master_bus["stop"]:
             return True
+        else:
+            return False
     
         
     def run(self):
@@ -69,7 +73,7 @@ class MAgentThread(Agent, Thread):
                 self.report_to_master(data="", finish_step = True)
                 
                 # Signal to stop simulation
-                stop = self.end_simulation(event.date) if event is not None else False
+                stop = self.stop_simulation(event.date) if event is not None else False
                 
                 # Notify master
                 self.condition.notify()
