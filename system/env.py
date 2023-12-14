@@ -36,6 +36,8 @@ class Env:
         
         self.journal = Journal()
         self.future_portfolio = PFuture("Binance", capital)
+        self.start = start
+        self.end = end
         self.market = Market(start = start, end = end, interval = interval)
         
         self.metrics = {}
