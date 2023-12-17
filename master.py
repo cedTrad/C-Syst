@@ -1,31 +1,43 @@
-from threading import Thread, Condition, Event
+from queue import Queue
+from threading import Thread, Condition, Event, Barrier
 
+from magent import MAgentThread
 
 class MasterAgentThread(Thread):
     
-    def __init__(self, condition, activeAgent, agent_bus, master_bus):
+    def __init__(self):
         Thread.__init__(self)
-        self.activeAgent = activeAgent
-        self.agentList = []
+        self.agents = []
         
-        self.condition = condition
-        
-        self.agent_bus = agent_bus
-        self.master_bus = master_bus
+        self.condition = Condition()
+        #self.event = Event()
+        self.master_bus = {}
+        self.agent_bus = {}
+        self.barrier = Barrier(4)
     
     
-    def addAgent(self, agentId):
-        self.agentList.append(agentId)
+    def addAgent(self, agentId, env):
+        self.agent_bus[agentId] = Queue()
+        self.master_bus[agentId] = Queue()
+        
+        sync = [self.condition, self.barrier, self.agent_bus[agentId], self.master_bus[agentId]]
+        params = agentId + [env] + sync
+        agent = MAgentThread(*params)
+        self.agents.append(agent)
+        
     
     def active_agents(self, msg = "start"):
-        for agentId in self.agentList:
-            self.master_bus["msg"].update({agentId : "Start work ..."})
+        for agent in self.agents:
+            agent.start()
+            self.master_bus[agent.Id].put("start work")
+            agent.join()
+            
         
     def select_active_agent(self, activeAgent = 1):
         self.master_bus.update({"activeAgent" : activeAgent})
     
     def wait_agent_finish_step(self):
-        msg = self.agent_bus["fstep"].values()
+        msg = self.agent_bus["fstep"]
         return not all(msg)
     
     def get_agent_report(self):

@@ -13,22 +13,22 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, symbol, allocation, env, policy_name):
-        self.agentId = agentId
-        self.symbol = symbol
-        self.allocation = allocation
+    def __init__(self, agentId, env, policy_name):
+        self.agentId = agentId[0]
+        self.symbol = agentId[1]
+        self.capital = env.capital
         
         self.env = env
         
-        self.asset = Asset(symbol)
+        self.asset = Asset(self.symbol)
         self.policy_name = policy_name
         
         self.fitness = []
         self.postindicator = []
         
-        self.policy = Politic(capital = allocation)
+        self.policy = Politic(capital = env.capital)
         self.policy.select_rule(policy_name)
-        self.gen_data = self.env.market.get_data(symbol)
+        self.gen_data = self.env.market.get_data(self.symbol)
         
     
     def get_event(self):
@@ -42,10 +42,10 @@ class Agent:
         return signalAction, riskAction
     
     
-    def update(self, state):
+    def update(self, state, paper_mode):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.agentId, self.asset, event, signalAction, riskAction)
+        next_state, reward = self.env.step(self.agentId, self.asset, event, signalAction, riskAction, paper_mode)
         return next_state, reward, event
     
     
