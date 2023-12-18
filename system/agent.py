@@ -13,7 +13,7 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, env, policy_name):
+    def __init__(self, agentId, env):
         self.agentId = agentId[0]
         self.symbol = agentId[1]
         self.capital = env.capital
@@ -21,13 +21,11 @@ class Agent:
         self.env = env
         
         self.asset = Asset(self.symbol)
-        self.policy_name = policy_name
         
         self.fitness = []
         self.postindicator = []
         
         self.policy = Politic(capital = env.capital)
-        self.policy.select_rule(policy_name)
         self.gen_data = self.env.market.get_data(self.symbol)
         
     
@@ -57,7 +55,8 @@ class Agent:
             self.postindicator.append(indicators)
     
     
-    def update_policy_params(self, params):
+    def update_policy(self, name, params):
+        self.policy.select_rule(name)
         self.policy.update_signal_params(params=params)
     
     
