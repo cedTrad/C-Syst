@@ -3,11 +3,12 @@ from threading import Thread, Event, Barrier
 
 from magent import MAgentThread
 
+#class MasterAgentThread(Thread):
 class MasterAgentThread(Thread):
     
     def __init__(self, env):
-        Thread.__init__(self)
-        self.agents = []
+        #Thread.__init__(self)
+        self.agents = {}
         
         self.env = env
         
@@ -25,16 +26,18 @@ class MasterAgentThread(Thread):
         self.agent_bus[Id] = Queue()
         self.master_bus[Id] = Queue()
         
-        sync = [self.event, self.barrier, self.agent_bus[Id], self.master_bus[Id]]
-        params = list(Id) + [env] + sync
+        sync = [self.event, self.agent_bus[Id], self.master_bus[Id], self.barrier]
+        params = [Id] + [env] + sync
+        print(params)
         agent = MAgentThread(*params)
-        self.agents.append(agent)
+        self.agents[Id] = agent
         
     
     def active_agents(self, msg = "start"):
-        for agent in self.agents:
+        for id, agent in self.agents.items():
+            print("id : ",id)
             agent.start()
-            self.master_bus[agent.Id].put("start work")
+            self.master_bus[id].put("start work")
             
     
     def update_params(self, Id, name, param):
@@ -52,8 +55,8 @@ class MasterAgentThread(Thread):
     
     def get_agent_report(self):
         temp = {}
-        for agent in self.agents:
-            temp[agent.Id] = self.agent_bus[agent.Id].get()
+        for id, agent in self.agents.items():
+            temp[id] = self.agent_bus[id].get()
         return temp
     
     def fitness(self):
@@ -65,7 +68,7 @@ class MasterAgentThread(Thread):
     def stop_simulation(self):
         if self.master_bus["stop"]:
             print("------ STOP -------")
-            for agent in self.agents:
+            for id, agent in self.agents.items():
                 agent.join()
             return True
     
@@ -74,7 +77,6 @@ class MasterAgentThread(Thread):
                 
             # Start simulation
             print(" ---------------   Master : Let's go ... ")
-            self.active_agents()
             self.select_active_agent(1)
             
             # Set the event  to signal agents to start 

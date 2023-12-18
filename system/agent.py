@@ -13,9 +13,9 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, env):
-        self.agentId = agentId[0]
-        self.symbol = agentId[1]
+    def __init__(self, Id, env):
+        self.Id = Id[0]
+        self.symbol = Id[1]
         self.capital = env.capital
         
         self.env = env
@@ -43,14 +43,14 @@ class Agent:
     def update(self, state, paper_mode):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.agentId, self.asset, event, signalAction, riskAction, paper_mode)
+        next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
         return next_state, reward, event
     
     
     def post_trade(self, event, close_trade = False):
         if close_trade:
             self.env.set_evaluation()
-            indicators = self.env.postprocessor.update_indicator(self.agentId)
+            indicators = self.env.postprocessor.update_indicator(self.Id)
             indicators.update({"date" : event.date, "symbol" : self.symbol})
             self.postindicator.append(indicators)
     
