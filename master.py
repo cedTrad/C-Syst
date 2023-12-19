@@ -32,25 +32,22 @@ class MasterAgentThread():
         self.agents[Id] = agent
         
     
-    def active_agents(self, data={"msg" : "start work", "stop" : False, "paper" : True}):
+    def active_agents(self):
         for id, agent in self.agents.items():
             print("Start id : ",id)
             agent.start()
-            self.master_bus[id].put(data)
-            
+    
+    def send_order_to_agents(self, data={"msg" : "start work", "stop" : False, "paper" : True}):
+        for id, agent in self.agents.items():
+            print("Set order for id : ",id)
+            self.master_bus[id].put(data) 
     
     def update_params(self, Id, name, param):
         self.agents[Id].update_policy(name, param)
         
         
     def select_active_agent(self, activeAgent = 1):
-        self.master_bus.update({"activeAgent" : activeAgent})
-    
-    
-    def wait_agent_finish_step(self):
-        msg = self.agent_bus["fstep"]
-        return not all(msg)
-    
+        ""
     
     def get_agent_report(self):
         temp = {}
@@ -64,18 +61,21 @@ class MasterAgentThread():
     def analyse_report(self, agentData):
         ""
     
-    def stop_simulation(self):
-        if self.master_bus["stop"]:
+    def stop_simulation(self, agentData):
+        if list(agentData.values())[0]["stop"]:
             print("------ STOP -------")
             for id, agent in self.agents.items():
                 agent.join()
             return True
+        else:
+            return False
     
     def run(self):
         while True:
                 
             # Start simulation
             print(" ---------------   Master : Let's go ... ")
+            self.send_order_to_agents()
             self.select_active_agent(1)
             
             # Set the event  to signal agents to start 
@@ -84,15 +84,18 @@ class MasterAgentThread():
                 
             # Wait agents finish thier tasks
             print("Master wait finish thier work ... ")
-            self.event.wait()
-                
+                           
             # After all agents execute their work, get agent msg
             agentData = self.get_agent_report()
             print(f"Agent report {agentData}")
                 
             # Decision for next step
             self.analyse_report(agentData)
-                
+            self.event.clear()
+            
             # Stop simulation
+            if self.stop_simulation(agentData):
+                print("--- MASTER BREAK ---")
+                break
  
             
