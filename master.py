@@ -4,7 +4,7 @@ from threading import Thread, Event, Barrier
 from magent import MAgentThread
 
 #class MasterAgentThread(Thread):
-class MasterAgentThread(Thread):
+class MasterAgentThread():
     
     def __init__(self, env):
         #Thread.__init__(self)
@@ -22,22 +22,21 @@ class MasterAgentThread(Thread):
             print(" //////////////// *** Barrier passee *** \\\\\\\\\\\\\\\\")
         self.barrier = Barrier(n, action=custom_action)
     
-    def addAgent(self, Id, env):
+    def add_agent(self, Id, env):
         self.agent_bus[Id] = Queue()
         self.master_bus[Id] = Queue()
         
-        sync = [self.event, self.agent_bus[Id], self.master_bus[Id], self.barrier]
+        sync = [self.event, self.agent_bus, self.master_bus, self.barrier]
         params = [Id] + [env] + sync
-        print(params)
         agent = MAgentThread(*params)
         self.agents[Id] = agent
         
     
-    def active_agents(self, msg = "start"):
+    def active_agents(self, data={"msg" : "start work", "stop" : False, "paper" : True}):
         for id, agent in self.agents.items():
-            print("id : ",id)
+            print("Start id : ",id)
             agent.start()
-            self.master_bus[id].put("start work")
+            self.master_bus[id].put(data)
             
     
     def update_params(self, Id, name, param):

@@ -25,14 +25,14 @@ class PFuture(Portfolio):
 
 class MEnv:
     
-    def __init__(self, symbols, capital, interval = "1d", start = "2023", end = "2023"):
-        self.symbol = symbols
+    def __init__(self, symbol, capital, interval = "1d", start = "2023", end = "2023"):
+        self.symbol = symbol
         self.capital = capital
         self.data = {}
         
         self.journal = Journal()
         self.future_portfolio = PFuture("Binance", capital)
-        self.future_portfolio.add_asset(symbols)
+        self.future_portfolio.add_asset(symbol)
         
         self.start = start
         self.end = end
@@ -60,14 +60,14 @@ class MEnv:
     
     def step(self, agentId, asset, event, signalAction, riskAction, paper_mode = True):
         reward = 0
-        self.execute(asset = asset, price = event.price,
-                     signalAction = signalAction, riskAction = riskAction, paper_mode=paper_mode)
-        
+        self.execute(asset = asset, price = event.price, signalAction = signalAction,
+                     riskAction = riskAction, paper_mode=paper_mode)
         self.future_portfolio.update(asset = asset)
-        self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
+        self.journal.add_data(agentId = agentId[0], date = event.date, price = event.price,
                               asset = asset, portfolio = self.future_portfolio)
         
         state = self.get_state()
+        
         if "Close" in signalAction["state"]:
             reward = asset.pnl
         
@@ -76,6 +76,7 @@ class MEnv:
         
     
     def reset(self):
+        self.future_portfolio.add_asset(self.symbol)
         self.future_portfolio.clear()
         
         state = self.get_state()

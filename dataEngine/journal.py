@@ -20,6 +20,7 @@ class Journal:
                 'in_value' : asset.in_value, 'out_value' : asset.out_value,
                 'value' : asset.value, 'pnl' : asset.pnl, 'pnl_pct' : asset.pnl_pct,
                 'symbol' : asset.symbol}
+        print(f"*** LINE {line}")
         add = pd.DataFrame(line , index = [date])
         self.tradesData = pd.concat([self.tradesData, add], ignore_index = True)
         

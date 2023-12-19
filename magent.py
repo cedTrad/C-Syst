@@ -20,17 +20,14 @@ class MAgentThread(Agent, Thread):
         from_master = self.master_bus[self.Id].get()
         msg = from_master["msg"]
         stop = from_master["stop"]
-        active = from_master["active"]
+        active = from_master["paper"]
         return msg, stop, active
     
     
-    def execute_master_order(self, state, active):
-        if active:
-            next_state, reward, event = self.update(state)
-            state = next_state
-            return state, reward, event, True
-        else:
-            return state, None, None, False
+    def execute_master_order(self, state, paper_mode=True):
+        next_state, reward, event = self.update(state, paper_mode)
+        print(" _________ STEP PASS _________")
+        return next_state, reward, event
     
     def report_to_master(self, data, finish_step):
         self.agent_bus[self.Id].put({"data" : data, "fstep":finish_step})
@@ -50,7 +47,7 @@ class MAgentThread(Agent, Thread):
         
     def run(self):
         state = self.env.reset()
-        
+        print(f"{self.Id} start state : {state}")
         while True:
             # Waitting master order
             print(f"{self.Id} waiting master's signal ... ")
@@ -58,12 +55,11 @@ class MAgentThread(Agent, Thread):
             
             # Get master msg (msg , stop)
             master_bus, master_status, active = self.get_master_bus()
-            print(f"{self.Id} - Master signal : {master_bus[0]}")
+            print(f"{self.Id} - Master signal : {master_bus}")
             
             # Execute order
-            state, reward, event, is_executed = self.execute_master_order(state, active)
-            if is_executed:
-                print(f"{self.Id} execute order")
+            state, reward, event = self.execute_master_order(state)    
+            print(f"{self.Id} ORDER EXECUTED ")
                 
             # Report to master
             self.event.set()
