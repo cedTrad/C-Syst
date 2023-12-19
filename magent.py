@@ -35,7 +35,9 @@ class MAgentThread(Agent, Thread):
         
     def stop_simulation(self, currentDate):
         endDate = self.env.end
-        date = datetime.strptime(endDate, "%Y-%m-%d %H:%M:%S")
+        print(f" *** endDate : {endDate}")
+        #date = datetime.strptime(endDate, "%Y-%m-%d %H:%M:%S")
+        date = datetime.strptime(endDate, "%Y-%m-%d")
         
         if currentDate == date:
             self.agent_bus["stop"] = True
@@ -47,7 +49,7 @@ class MAgentThread(Agent, Thread):
         
     def run(self):
         state = self.env.reset()
-        print(f"{self.Id} start state : {state}")
+        
         while True:
             # Waitting master order
             print(f"{self.Id} waiting master's signal ... ")
@@ -66,7 +68,7 @@ class MAgentThread(Agent, Thread):
             self.report_to_master(data="action executed...", finish_step = True)
                 
             # Signal to stop simulation
-            stop = self.stop_simulation(event.date) if event is not None else False
+            stop = self.stop_simulation(event.date)
                 
             # Notify master
             print(f"{self.Id} has finished step")
