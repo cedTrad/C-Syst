@@ -40,7 +40,7 @@ class Agent:
         return signalAction, riskAction
     
     
-    def update(self, state, paper_mode):
+    def update(self, state, paper_mode=True):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
