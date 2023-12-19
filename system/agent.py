@@ -13,22 +13,20 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, symbol, allocation, env, policy_name):
-        self.agentId = agentId
-        self.symbol = symbol
-        self.allocation = allocation
+    def __init__(self, Id, env):
+        self.Id = Id[0]
+        self.symbol = Id[1]
+        self.capital = env.capital
         
         self.env = env
         
-        self.asset = Asset(symbol)
-        self.policy_name = policy_name
+        self.asset = Asset(self.symbol)
         
         self.fitness = []
         self.postindicator = []
         
-        self.policy = Politic(capital = allocation)
-        self.policy.select_rule(policy_name)
-        self.gen_data = self.env.market.get_data(symbol)
+        self.policy = Politic(capital = env.capital)
+        self.gen_data = self.env.market.get_data(self.symbol)
         
     
     def get_event(self):
@@ -42,22 +40,23 @@ class Agent:
         return signalAction, riskAction
     
     
-    def update(self, state):
+    def update(self, state, paper_mode=True):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.agentId, self.asset, event, signalAction, riskAction)
+        next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
         return next_state, reward, event
     
     
     def post_trade(self, event, close_trade = False):
         if close_trade:
             self.env.set_evaluation()
-            indicators = self.env.postprocessor.update_indicator(self.agentId)
+            indicators = self.env.postprocessor.update_indicator(self.Id)
             indicators.update({"date" : event.date, "symbol" : self.symbol})
             self.postindicator.append(indicators)
     
     
-    def update_policy_params(self, params):
+    def update_policy(self, name, params):
+        self.policy.select_rule(name)
         self.policy.update_signal_params(params=params)
     
     
