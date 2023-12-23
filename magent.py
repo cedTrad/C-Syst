@@ -61,7 +61,7 @@ class MAgentThread(Agent, Thread):
             
             # Execute order
             state, reward, event = self.execute_master_order(state)    
-            print(f"{self.Id} ORDER EXECUTED ")
+            print(f"{event.date}  -- {self.Id} ORDER EXECUTED ")
             
             # Signal to stop simulation
             stop = self.stop_simulation(event.date)

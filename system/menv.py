@@ -73,6 +73,24 @@ class MEnv:
         
         return state, reward
     
+    
+    def pos_data(self):
+        self.tradesData, self.portfolioData = self.journal.tradesData, self.journal.portfolioData
+        
+    
+    def get_viz(self, agentId, symbol):
+        self.pos_data()
+        self.ireport = IReport(agentId, db=self.market.db)
+        
+        self.ireport.load(self.tradesData, self.portfolioData)
+        
+        fig0, fig1 = self.ireport.benchmark(symbol)
+        fig0.show()
+        
+        fig = self.ireport.plot_asset(symbol)
+        fig.show()
+        
+        fig1.show()
         
     
     def reset(self):
