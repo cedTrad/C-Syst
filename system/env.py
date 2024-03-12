@@ -1,7 +1,7 @@
-from .base import Portfolio, Asset
 from .fsm import FSM
 from .market import Market
 
+from .portfolio_manager import PFuture, Asset
 from evalutation.reporting import GReport, IReport
 
 from dataEngine.journal import Journal
@@ -9,21 +9,6 @@ from dataEngine.journal import Journal
 signalAction = ["Open", "Close", "Resize", "-", None]
 riskAction = ["quantity", "leverage", "closePrice", "sl", "tp"]
 
-
-
-class PFuture(Portfolio):    
-    def __init__(self, name, capital):
-        #Portfolio.__init__(self, name, capital)
-        super().__init__(name, capital)
-        self.long = {}
-        self.short = {}
-        self.long_portfolio = 0
-        self.short_portfolio = 0
-
-
-class PDefi:
-    def __init__(self):
-        self.name = "metamask"
     
 
 class Env:

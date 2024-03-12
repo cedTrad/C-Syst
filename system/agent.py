@@ -2,14 +2,9 @@ import copy
 
 from .decision.politic import Politic
 from .oms import OMS
-from .base import Asset
+from .portfolio_manager import Asset, Portfolio
 
-
-class Event:
-     def __init__(self, date, price):
-         self.date = date
-         self.price = price
-         
+from .utils import Event
 
 class Agent:
     
