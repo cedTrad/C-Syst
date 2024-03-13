@@ -1,3 +1,4 @@
+import time
 from .oms import OMS
 
 
@@ -25,34 +26,54 @@ class FSM:
         if self.signal_action["state"][:2] == ("Open", "LONG"):
             response = self.oms.order.open_long(asset, price, quantity = self.risk_action["quantity"])
             portfolio.rebalance(amount = self.risk_action["amount"])
+            succes = True
             
         elif self.signal_action["state"][:2] == ("Close", "LONG"):
             response = self.oms.order.close_long(asset, price)
+            succes = True
         
         # --------------------------------------------------------   ---------
         elif self.signal_action["state"][:2] == ("Open", "SHORT"):
             response = self.oms.order.open_short(asset, price = price, quantity = self.risk_action["quantity"])
             portfolio.rebalance(amount = self.risk_action["amount"])
+            succes = True
         
         elif self.signal_action["state"][:2] == ("Close", "SHORT"):
             response = self.oms.order.close_short(asset, price = price)
+            succes = True
         
         # --------------------------------------------------------   ---------
         elif self.signal_action["state"][:2] == ("Resize", "LONG"):
             "place_order()"
+            succes = True
         
         elif self.signal_action["state"][:2] == ("Resize", "SHORT"):
             "place_order()"
+            succes = True
         
         # --------------------------------------------------------   ---------
         elif self.signal_action["state"][0] == "-":
             asset.update(price = price)
+            succes = True
+        
+        # --------------------------------------------------------   ---------
+        else:
+            succes = False
+        
+        return succes
             
     
-    
-    def callback_actuator(self):
-        ""
-    
+    def callback_actuator(self, asset, price, portfolio):
+        i = 0
+        max = 10
+        while True:
+            time.sleep(0.5)
+            print("retry in 0.5s ... ")
+            i += 1
+            if i == max:
+                break
+            self.perform(asset=asset, price=price, portfolio=portfolio)
+            
     
     def predicate(self, portfolio, min_amount = 20):
         if "Open" in self.signal_action:
@@ -68,7 +89,7 @@ class FSM:
         if effect:
             sucess = self.actuator(portfolio, asset, price)
             if not sucess:
-                self.callback_actuator()
+                self.callback_actuator(asset=asset, price=price, portfolio=portfolio)
         return sucess
 
 

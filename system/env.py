@@ -1,15 +1,14 @@
-from .fsm import FSM
-from .market import Market
-
+from .ffc.fsm import FSM
 from .portfolio_manager import PFuture, Asset
-from evalutation.reporting import GReport, IReport
 
-from dataEngine.journal import Journal
+from .bucket.journal import Journal
+
+from .market import Market
+from evalutation.reporting import GReport, IReport
 
 signalAction = ["Open", "Close", "Resize", "-", None]
 riskAction = ["quantity", "leverage", "closePrice", "sl", "tp"]
 
-    
 
 class Env:
     
@@ -20,7 +19,7 @@ class Env:
         self.data = {}
         
         self.journal = Journal()
-        self.future_portfolio = PFuture("Binance", capital)
+        self.portfolio = PFuture("Binance", capital)
         self.start = start
         self.end = end
         self.market = Market(start = start, end = end, interval = interval)
@@ -30,17 +29,16 @@ class Env:
         self.init_portfolio()
         
         
-        
     def init_portfolio(self):
         for symbol in self.symbols:
-            self.future_portfolio.add_asset(symbol)
+            self.portfolio.add_asset(symbol)
     
     
     def get_state(self):
-        portfolio = {"capital" : self.future_portfolio.capital,
-                    "risk_value" : self.future_portfolio.risk_value,
-                    "save_value" : self.future_portfolio.save_value,
-                    "available_value" : self.future_portfolio.available_value
+        portfolio = {"capital" : self.portfolio.capital,
+                    "risk_value" : self.portfolio.risk_value,
+                    "save_value" : self.portfolio.save_value,
+                    "available_value" : self.portfolio.available_value
                     }
         indicator = {"average": 0, "dist_sl" : 0, "profit_factor" : 0, 
                      "win_rate" : 0, "drawdown": 0, "recovery" : 0}
@@ -51,7 +49,7 @@ class Env:
         current_state = (asset.state, asset.type, asset.tp, asset.sl)
         
         fsm = FSM(current_state, signalAction, riskAction, paper_mode)
-        fsm.perform(asset=asset, price=price, portfolio=self.future_portfolio)
+        fsm.perform(asset=asset, price=price, portfolio=self.portfolio)
         
     
     def step(self, agentId, asset, event, signalAction, riskAction, paper_mode = True):
@@ -59,9 +57,9 @@ class Env:
         self.execute(asset = asset, price = event.price,
                      signalAction = signalAction, riskAction = riskAction, paper_mode=paper_mode)
         
-        self.future_portfolio.update(asset = asset)
+        self.portfolio.update(asset = asset)
         self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
-                              asset = asset, portfolio = self.future_portfolio)
+                              asset = asset, portfolio = self.portfolio)
         
         state = self.get_state()
         if "Close" in signalAction["state"]:
@@ -106,7 +104,85 @@ class Env:
     
     def reset(self):
         self.init_portfolio()
-        self.future_portfolio.clear()
+        self.portfolio.clear()
+        
+        state = self.get_state()
+        return state
+
+
+
+
+class SubEnv:
+    
+    def __init__(self, symbol, capital, interval = "1d", start = "2023", end = "2023"):
+        self.symbol = symbol
+        self.capital = capital
+        self.data = {}
+        
+        self.journal = Journal()
+        self.portfolio = PFuture("Binance", capital)
+        self.portfolio.add_asset(symbol)
+        
+        self.start = start
+        self.end = end
+        self.market = Market(start = start, end = end, interval = interval)
+        
+        
+    def get_state(self):
+        portfolio = {"capital" : self.portfolio.capital,
+                    "risk_value" : self.portfolio.risk_value,
+                    "save_value" : self.portfolio.save_value,
+                    "available_value" : self.portfolio.available_value
+                    }
+        indicator = {"average": 0, "dist_sl" : 0, "profit_factor" : 0, 
+                     "win_rate" : 0, "drawdown": 0, "recovery" : 0}
+        return {"portfolio" : portfolio, "indicator" : indicator}
+    
+    
+    def execute(self, asset, price, signalAction, riskAction, paper_mode):
+        current_state = (asset.state, asset.type, asset.tp, asset.sl)
+        fsm = FSM(current_state, signalAction, riskAction, paper_mode)
+        fsm.perform(asset=asset, price=price, portfolio=self.portfolio)
+        
+    
+    def step(self, agentId, asset, event, signalAction, riskAction, paper_mode = True):
+        reward = 0
+        self.execute(asset = asset, price = event.price, signalAction = signalAction,
+                     riskAction = riskAction, paper_mode=paper_mode)
+        self.portfolio.update(asset = asset)
+        self.journal.add_data(agentId = agentId[0], date = event.date, price = event.price,
+                              asset = asset, portfolio = self.portfolio)
+        
+        state = self.get_state()
+        
+        if "Close" in signalAction["state"]:
+            reward = asset.pnl
+        
+        return state, reward
+    
+    
+    def pos_data(self):
+        self.tradesData, self.portfolioData = self.journal.tradesData, self.journal.portfolioData
+        
+    
+    def get_viz(self, agentId, symbol):
+        self.pos_data()
+        self.ireport = IReport(agentId, db=self.market.db)
+        
+        self.ireport.load(self.tradesData, self.portfolioData)
+        
+        fig0, fig1 = self.ireport.benchmark(symbol)
+        fig0.show()
+        
+        fig = self.ireport.plot_asset(symbol)
+        fig.show()
+        
+        fig1.show()
+        
+    
+    def reset(self):
+        self.portfolio.add_asset(self.symbol)
+        self.portfolio.clear()
         
         state = self.get_state()
         return state

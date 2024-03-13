@@ -1,8 +1,6 @@
-
-from .signal import Signal
-from .management import Management
-
-from .transition import Transition
+from .decision.signal import Signal
+from .decision.management import Management
+from .decision.transition import Transition
 
 
 class Politic:

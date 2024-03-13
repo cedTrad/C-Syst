@@ -1,7 +1,4 @@
-import copy
-
-from .decision.politic import Politic
-from .oms import OMS
+from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
 
 from .utils import Event
@@ -14,7 +11,6 @@ class Agent:
         self.capital = env.capital
         
         self.env = env
-        
         self.asset = Asset(self.symbol)
         
         self.fitness = []
