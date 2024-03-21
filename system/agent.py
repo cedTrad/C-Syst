@@ -75,9 +75,10 @@ class Agent:
                 break
             
     
-    def report(self):
-        data = self.env.data
-        ""
+    def view_report(self):
+        db = self.env.market.db
+        report = Report(db, self.mtng)
+        report.plot_equity_i(self.Id)
            
     
     def learn(self):

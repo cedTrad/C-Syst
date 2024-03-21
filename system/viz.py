@@ -1,3 +1,5 @@
+import numpy as np
+
 from .utils.plot import subplot, subplots, add_bar, add_line, plot_candle, signal_point, create_figure, color_returns, color_trades, add_second_y
 
 import plotly.figure_factory as ff
@@ -16,6 +18,7 @@ class Benchmark:
     def preprocess(self):
         self.capital = self.portfolioDataAgent["capital"]
         self.tradeDataAgent["cum_gp_value"] = self.tradeDataAgent["cum_gp"] + self.capital
+        self.tradeDataAgent["benchmark"] = self.tradeDataAgent["price_cum"]
         self.tradeDataAgent["benchmark_value"] = self.tradeDataAgent["price_cum"] * self.capital
         self.tradeDataAgent["value_re_value"] = self.tradeDataAgent["value"] + self.tradeDataAgent["out_value"]
         
@@ -25,7 +28,7 @@ class Benchmark:
             return self.portfolioDataAgent["capital"] - self.portfolioDataAgent["capital"].cummax()
         else:
             return (self.portfolioDataAgent["capital"] - self.portfolioDataAgent["capital"].cummax()) / self.portfolioDataAgent["capital"].cummax()
-        
+    
         
     def equity(self, value=False):
         #self.preprocess()
@@ -53,10 +56,19 @@ class Benchmark:
         
         return fig
         
+    
+    def get_points(self):
+        loc = np.where(self.tradeDataAgent["status"] == "Open")
+        entryPoints = self.tradeDataAgent.iloc[loc][['side', 'status', 'price', 'pnl']]
+        
+        loc = np.where(self.tradeDataAgent["status"] == "Close")
+        exitPoints = self.tradeDataAgent.iloc[loc][['side', 'status', 'price', 'pnl']]
+        
+        return entryPoints, exitPoints
         
     def candle(self, fig, col, row, data, symbol):
         
-        entryPoints, exitPoints = self.get_points(self.tradeDataAgent)
+        entryPoints, exitPoints = self.get_points()
         
         start = self.tradeDataAgent.index[0]
         end = self.tradeDataAgent.index[-1]
