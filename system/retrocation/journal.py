@@ -1,13 +1,10 @@
 import pandas as pd
 import numpy as np
-import uuid
-import json
-import os
 
 
 class Journal:
     
-    def __init__(self, database_config = None):
+    def __init__(self):
         self.portfolioData = pd.DataFrame()
         self.metricsData = pd.DataFrame()
         self.tradesData = pd.DataFrame()

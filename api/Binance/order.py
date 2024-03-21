@@ -144,7 +144,7 @@ class Base:
 
 
 
-class OrderAPI(Base):
+class OrderAPIBinance(Base):
     
     def __init__(self, symbol, recvWindow = 10000):
         Base.__init__(self, symbol, recvWindow)

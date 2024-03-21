@@ -22,7 +22,6 @@ import utils
 
 #       ------ Spot
 
-
 #       ------ Future
 class Binance:
     
@@ -91,3 +90,5 @@ class DefiLama:
     
     def __init__(self):
         self.symbol = 0
+
+

@@ -60,6 +60,11 @@ class MasterAgentThread():
         
     def analyse_report(self, agentData):
         ""
+        
+    def policy(self):
+        ""
+    
+    
     
     def stop_simulation(self, agentData):
         if list(agentData.values())[0]["stop"]:

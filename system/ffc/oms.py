@@ -1,6 +1,6 @@
-from api.Binance.order import OrderAPI
+from api.Binance.order import OrderAPIBinance
 
-class OrderTest:
+class PaperOrder:
     
     def __init__(self, symbol=""):
         self.symbol = symbol
@@ -60,9 +60,9 @@ class OMS:
     
     def __init__(self, paper_mode = True):
         if paper_mode:
-            self.order = OrderTest()
+            self.order = PaperOrder()
         else:
-            self.order = OrderAPI
+            self.order = OrderAPIBinance
         self.long = []
         self.short = []
         

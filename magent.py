@@ -29,6 +29,7 @@ class MAgentThread(Agent, Thread):
         print(" _________ STEP PASS _________")
         return next_state, reward, event
     
+    
     def report_to_master(self, data, finish_step, stop):
         self.agent_bus[self.Id].put({"data" : data, "fstep":finish_step, "stop":stop})
         
@@ -61,7 +62,7 @@ class MAgentThread(Agent, Thread):
             
             # Execute order
             state, reward, event = self.execute_master_order(state)    
-            print(f"{self.Id} ORDER EXECUTED ")
+            print(f"{event.date}  -- {self.Id} ORDER EXECUTED ")
             
             # Signal to stop simulation
             stop = self.stop_simulation(event.date)
@@ -78,6 +79,9 @@ class MAgentThread(Agent, Thread):
             if stop:
                 print(f"--- STOP {self.Id} ----")
                 break
+        
+    
+
         
     
 

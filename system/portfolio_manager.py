@@ -1,4 +1,5 @@
 
+
 class Asset:
     
     def __init__(self, symbol):
@@ -104,3 +105,17 @@ class Portfolio:
         
         
         
+
+class PFuture(Portfolio):
+    def __init__(self, name, capital):
+        #Portfolio.__init__(self, name, capital)
+        super().__init__(name, capital)
+        self.long = {}
+        self.short = {}
+        self.long_portfolio = 0
+        self.short_portfolio = 0
+
+
+class PDefi:
+    def __init__(self):
+        self.name = "metamask"
