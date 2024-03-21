@@ -1,9 +1,10 @@
 from .ffc.fsm import FSM
 from .portfolio_manager import PFuture, Asset
 
-from .bucket.journal import Journal
+from .retrocation.journal import Journal
 
 from .market import Market
+
 from evalutation.reporting import GReport, IReport
 
 signalAction = ["Open", "Close", "Resize", "-", None]
@@ -35,6 +36,9 @@ class Env:
     
     
     def get_state(self):
+        
+        market_data = {"price" : 1000}
+        
         portfolio = {"capital" : self.portfolio.capital,
                     "risk_value" : self.portfolio.risk_value,
                     "save_value" : self.portfolio.save_value,
@@ -161,25 +165,22 @@ class SubEnv:
         return state, reward
     
     
-    def pos_data(self):
+    
+    def get_report(self, agentId, symbol, viz = True):
         self.tradesData, self.portfolioData = self.journal.tradesData, self.journal.portfolioData
         
-    
-    def get_viz(self, agentId, symbol):
-        self.pos_data()
         self.ireport = IReport(agentId, db=self.market.db)
-        
         self.ireport.load(self.tradesData, self.portfolioData)
         
-        fig0, fig1 = self.ireport.benchmark(symbol)
-        fig0.show()
+        if viz:
+            fig0, fig1 = self.ireport.benchmark(symbol)
+            fig = self.ireport.plot_asset(symbol)
+            
+            fig0.show()
+            fig1.show()
+            fig.show()
         
-        fig = self.ireport.plot_asset(symbol)
-        fig.show()
         
-        fig1.show()
-        
-    
     def reset(self):
         self.portfolio.add_asset(self.symbol)
         self.portfolio.clear()

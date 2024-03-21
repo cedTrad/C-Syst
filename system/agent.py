@@ -1,7 +1,13 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
+from .monitoring import Monitoring
 
-from .utils import Event
+from .event import Event
+
+from evalutation.postprocessor import Postprocessor
+
+import time
+from IPython.display import clear_output
 
 class Agent:
     
@@ -17,6 +23,8 @@ class Agent:
         self.postindicator = []
         
         self.policy = Politic(capital = env.capital)
+        self.mtng = Monitoring()
+        
         self.gen_data = self.env.market.get_data(self.symbol)
         
     
@@ -35,15 +43,13 @@ class Agent:
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
-        return next_state, reward, event
+        return next_state, reward, event, signalAction
     
     
-    def post_trade(self, event, close_trade = False):
-        if close_trade:
-            self.env.set_evaluation()
-            indicators = self.env.postprocessor.update_indicator(self.Id)
-            indicators.update({"date" : event.date, "symbol" : self.symbol})
-            self.postindicator.append(indicators)
+    def monitoring(self, signal = True):
+        if signal[0] == "Close":
+            journal = self.env.journal
+            metrics = self.mtng.update_metric(self.Id, journal)
     
     
     def update_policy(self, name, params):
@@ -56,11 +62,17 @@ class Agent:
         i = 0
         while True:
             try:
-                next_state, reward, event = self.update(state)
+                next_state, reward, event, signal = self.update(state)
                 state = next_state
                 i += 1
+                
+                print(f" Agent : {self.Id}")
+                print(f" i {i}")
+                self.monitoring(signal["state"])
+                
             except StopIteration:
                 break
+            
                 
     
     def learn(self):
@@ -69,7 +81,6 @@ class Agent:
         
     def get_report(self):
         ""
-
         
     def optimize(self):
         self.policy.signal
