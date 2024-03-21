@@ -27,7 +27,7 @@ class Transition:
             return False, ("", "")
         
         
-    def get_skip(self):
+    def skip(self):
         if self.signal == "LONG" and self.current_asset_position == 1:
             return True, ("-", "LONG")
         elif self.signal == "SHORT" and self.current_asset_position == -1:

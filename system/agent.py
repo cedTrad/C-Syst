@@ -1,6 +1,7 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
 from .monitoring import Monitoring
+from .report import Report
 
 from .event import Event
 
@@ -73,13 +74,13 @@ class Agent:
             except StopIteration:
                 break
             
-                
+    
+    def report(self):
+        data = self.env.data
+        ""
+           
     
     def learn(self):
-        ""
-        
-        
-    def get_report(self):
         ""
         
     def optimize(self):

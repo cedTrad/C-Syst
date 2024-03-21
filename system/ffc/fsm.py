@@ -2,7 +2,7 @@ import time
 from .oms import OMS
 
 
-STATE = [
+ACTION = [
     ("Open", "LONG", "TP", "SL"), ("-", "LONG", "TP", "SL"), ("Close", "LONG", "TP", "SL"),
     ("Open", "SHORT", "TP", "SL"), ("-", "SHORT", "TP", "SL"), ("Close", "SHORT", "TP", "SL"),
     ("Resize", "LONG"), ("Resize", "SHORT"), ("-", None)

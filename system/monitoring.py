@@ -16,11 +16,11 @@ class Monitoring:
         tradeDataAgent = tradeDataAgents[agentId]
         portfoliosDataAgent = portfoliosDataAgents[agentId]
         
-        return tradeDataAgent, portfoliosData
+        return tradeDataAgent, portfoliosDataAgent
     
     
     def update_metric(self, agentId, journal):
-        self.tradeDataAgent, self.portfoliosData = self.transform_trade_data(agentId, journal)
+        self.tradeDataAgent, self.portfoliosDataAgent = self.transform_trade_data(agentId, journal)
         metrics = self.processor.update_metric(self.tradeDataAgent)
         return metrics
         
