@@ -5,16 +5,19 @@ import ast
 
 class APostprocessing:
     
+    def __init__(self, capital):
+        self.capital = capital
+    
     def add_trades_features(self, trades):
         trades['gp'] = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]), trades['pnl'].diff(), 0)
         trades["gp"] = np.where(trades["status"] == "Open", 0, trades["gp"])
         trades["cum_gp"] = trades["gp"].cumsum()
         
-        trades['rets'] = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]), trades['pnl_pct'].diff(), 0)
-        trades["rets"] = np.where(trades["status"] == "Open", 0, trades["rets"])
+        trades['rets'] = trades["cum_gp"] / self.capital
+        trades["cum_rets"] = (trades["rets"] + 1).cumprod()
         
         trades['ret_price'] = trades['price'].pct_change()
-        trades['price_cum'] = (trades['ret_price'] + 1).cumprod()
+        trades['cum_price'] = (trades['ret_price'] + 1).cumprod()
         
     
     def transform(self, tradesData):
@@ -41,7 +44,6 @@ class APostprocessing:
     def recovery_per_trade(self, trades):
         trades["loss"] = np.where(trades["pnl_pct"] <= 0, trades["pnl_pct"], 0)
         trades["recovery"] = (1 / (1 + trades["loss"])) - 1
-    
     
     def split_long_short(self, trades):
         loc_long = np.where(trades["state"].apply(lambda x : ast.literal_eval(x)[1]) == "LONG")
@@ -78,23 +80,28 @@ class PPostprocessing:
     
     def transform(self, portfolioData):
         self.portfolioData = portfolioData
-        #portfolioData.set_index("date", inplace = True)
+        portfolioData.set_index("date", inplace = True)
         
         portfolios = self.split_by_agent()
         return portfolios
-        
-        
+    
         
     def split_by_agent(self):
         agentIds = self.portfolioData["agentId"].unique()
         portfolios = {}
         for agentId in agentIds:
-            portfolios[agentId] = self.portfolioData[self.portfolioData["agentId"] == agentId]
+            portfolio = self.portfolioData[self.portfolioData["agentId"] == agentId]
+            self.add_features(portfolio)
+            portfolios[agentId] = portfolio
         return portfolios
+    
+    
+    def drawdown(self, portfolio):
+        portfolio["drawdown"] = (portfolio["capital"] - portfolio["capital"].cummax()) / portfolio["capital"].cummax()
     
     
     def add_features(self, portfolioData):
         portfolioData["rets"] = portfolioData["capital"].pct_change()
         portfolioData["cum_rets"] = (portfolioData["rets"] + 1).cumprod()
-        
+        self.drawdown(portfolioData)
     

@@ -22,16 +22,16 @@ class Report:
         return AgentId
         
     
-    def plot_equity_i(self, agentId, value=True):
+    def plot_equity(self, agentId):
         
         Agent = self.processing(agentId)
         tradeDataAgent = Agent["tradeDataAgent"]
         portfolioDataAgent = Agent["portfolioDataAgent"]
         data = Agent["data"]
-        
+    
         benchmark = Benchmark(tradeDataAgent, portfolioDataAgent)
         
-        fig_equ = benchmark.equity(value)
+        fig_equ = benchmark.equity()
         fig_equ.show()
         
         fig_asset = benchmark.asset(data)

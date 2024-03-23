@@ -2,8 +2,8 @@ from .retrocation.processor import Processor
 
 class Monitoring:
     
-    def __init__(self):
-        self.processor = Processor()
+    def __init__(self, capital):
+        self.processor = Processor(capital)
         
     
     def transform_trade_data(self, agentId, journal):
@@ -23,6 +23,7 @@ class Monitoring:
     def update_metric(self, agentId, journal):
         self.tradeDataAgent, self.portfolioDataAgent, self.metricDataAgent = self.transform_trade_data(agentId, journal)
         metrics = self.processor.update_metric(self.tradeDataAgent)
+        
         return metrics
         
         

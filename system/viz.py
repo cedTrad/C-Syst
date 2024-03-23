@@ -17,42 +17,28 @@ class Benchmark:
         
     def preprocess(self):
         self.capital = self.portfolioDataAgent["capital"]
-        self.tradeDataAgent["cum_gp_value"] = self.tradeDataAgent["cum_gp"] + self.capital
-        self.tradeDataAgent["benchmark"] = self.tradeDataAgent["price_cum"]
-        self.tradeDataAgent["benchmark_value"] = self.tradeDataAgent["price_cum"] * self.capital
-        self.tradeDataAgent["value_re_value"] = self.tradeDataAgent["value"] + self.tradeDataAgent["out_value"]
+        self.tradeDataAgent["benchmark"] = self.tradeDataAgent["cum_price"]
         
         
-    def drawdown(self, value=False):
-        if value:
-            return self.portfolioDataAgent["capital"] - self.portfolioDataAgent["capital"].cummax()
-        else:
-            return (self.portfolioDataAgent["capital"] - self.portfolioDataAgent["capital"].cummax()) / self.portfolioDataAgent["capital"].cummax()
-    
-        
-    def equity(self, value=False):
-        #self.preprocess()
-        
+    def equity(self):
         agentId = self.tradeDataAgent.iloc[0]["agentId"]
         symbol = self.tradeDataAgent.iloc[0]["symbol"]
         
-        if value:
-            self.portfolioDataAgent["drawdown"] = self.drawdown(value)
-            
-            fig = subplot(nb_cols = 2, nb_rows = 1)
-            add_line(fig, data=self.tradeDataAgent, feature="benchmark", name=f"{agentId} : market", col=1, row=1)
-            add_line(fig, data=self.tradeDataAgent, feature="cum_gp", name=f"{agentId} : {symbol}", col=1, row=1)
-            
-            add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : market", col=2, row=1)
-            
-        else:
-            self.portfolioDataAgent["drawdown"] = self.drawdown(value)
-            
-            fig = subplot(nb_cols = 1, nb_rows = 2)
-            add_line(fig, data=self.tradeDataAgent, feature="benchmark_value", name=f"{agentId} : market", col=1, row=1)
-            add_line(fig, data=self.tradeDataAgent, feature="cum_gp_value", name=f"{agentId} : {symbol}", col=1, row=1)
-            
-            add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : market", col=2, row=1)
+        fig = subplot(nb_cols = 1, nb_rows = 2, row_heights=[0.7, 0.3])
+        add_line(fig, data=self.tradeDataAgent, feature="benchmark", name=f"{agentId} : market", col=1, row=1)
+        
+        add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"{agentId} : {symbol}", col=1, row=1)
+        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets {agentId} : {symbol}", col=1, row=1)
+        add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId} : {symbol}", col=1, row=1)
+        
+        add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : drawdown", col=1, row=2)
+        
+        fig.update_layout(height = 500 , width = 1000,
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0}
+                          )
         
         return fig
         
@@ -85,16 +71,15 @@ class Benchmark:
         
         agentId = self.tradeDataAgent.iloc[0]["agentId"]
         symbol = self.tradeDataAgent.iloc[0]["symbol"]
-        self.portfolioDataAgent["drawdown"] = self.drawdown()
         
         fig = subplots(nb_rows=3, nb_cols=1, row_heights=[0.15, 0.7, 0.15])
         
         add_bar(fig=fig, col=1, row=1, data=self.tradeDataAgent, feature='pnl', name='pnl')
-        add_second_y(fig=fig, col=1, row=1, data=self.tradeDataAgent, name='pnl_pct')
+        add_line(fig=fig, col=1, row=1, data=self.tradeDataAgent, feature="pnl_pct", name='pnl_pct')
+        #add_second_y(fig=fig, col=1, row=1, data=self.tradeDataAgent, name='pnl_pct')
         
         self.candle(fig=fig, col=1, row=2, data=data, symbol=symbol)
-        
-        add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"drawdown", col=1, row=3)
+        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f"cum rets", col=1, row=3)
         
         fig.update_layout(height = 800 , width = 1000,
                           legend = dict(orientation="h",
