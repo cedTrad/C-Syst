@@ -59,7 +59,7 @@ class Politic:
         
         canOpenPosition, sideIn = Transition(signal, current_asset_position).get_in()
         canClosePosition, sideOut = Transition(signal, current_asset_position).get_out()
-        skip, _ = Transition(signal, current_asset_position).get_skip()
+        skip, _ = Transition(signal, current_asset_position).skip()
         
         if canOpenPosition:
             signalAction.update({"state" : sideIn + (sl, tp)})

@@ -5,8 +5,8 @@ from .postprocessing import APostprocessing, PPostprocessing
 
 class Processor:
     
-    def __init__(self):
-        self.processAsset = APostprocessing()
+    def __init__(self, capital):
+        self.processAsset = APostprocessing(capital)
         self.processPort = PPostprocessing()
     
 

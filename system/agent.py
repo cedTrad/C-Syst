@@ -1,6 +1,7 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
 from .monitoring import Monitoring
+from .report import Report
 
 from .event import Event
 
@@ -11,10 +12,10 @@ from IPython.display import clear_output
 
 class Agent:
     
-    def __init__(self, Id, env):
+    def __init__(self, Id, capital, env):
         self.Id = Id[0]
         self.symbol = Id[1]
-        self.capital = env.capital
+        self.capital = capital
         
         self.env = env
         self.asset = Asset(self.symbol)
@@ -22,8 +23,8 @@ class Agent:
         self.fitness = []
         self.postindicator = []
         
-        self.policy = Politic(capital = env.capital)
-        self.mtng = Monitoring()
+        self.policy = Politic(capital = capital)
+        self.mtng = Monitoring(capital)
         
         self.gen_data = self.env.market.get_data(self.symbol)
         
@@ -73,13 +74,14 @@ class Agent:
             except StopIteration:
                 break
             
-                
+    
+    def view_report(self):
+        db = self.env.market.db
+        report = Report(db, self.mtng)
+        report.plot_equity(self.Id)
+           
     
     def learn(self):
-        ""
-        
-        
-    def get_report(self):
         ""
         
     def optimize(self):
