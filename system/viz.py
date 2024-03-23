@@ -29,7 +29,7 @@ class Benchmark:
         
         add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"{agentId} : {symbol}", col=1, row=1)
         add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets {agentId} : {symbol}", col=1, row=1)
-        add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId} : {symbol}", col=1, row=1)
+        #add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId} : {symbol}", col=1, row=1)
         
         add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : drawdown", col=1, row=2)
         
