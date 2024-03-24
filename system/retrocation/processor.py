@@ -21,6 +21,9 @@ class Processor:
         return AMetric(tradeDataAgent).update()
     
     
+    def update_metric_by_trade(self):
+        ""
+    
     def update_metric(self, tradeDataAgent):
         metrics = []
         metric = self.gen_data(tradeDataAgent)
