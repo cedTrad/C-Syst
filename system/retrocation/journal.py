@@ -33,7 +33,7 @@ class Journal:
     def add_metrics_line(self, date, line):
         add = pd.DataFrame(line, index=[date])
         self.metricsData = pd.concat([self.metricsData, add], ignore_index=True)
-
+        
     
     def add_data(self, agentId, date, price, asset, portfolio):
         self.add_trade_line(agentId, date, price, asset)

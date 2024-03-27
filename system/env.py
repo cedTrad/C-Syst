@@ -3,7 +3,7 @@ from .portfolio_manager import PFuture, Asset
 
 from .retrocation.journal import Journal
 
-from .market import Market
+from .event import MarketEvent
 
 from evalutation.reporting import GReport, IReport
 
@@ -23,7 +23,7 @@ class Env:
         self.portfolio = PFuture("Binance", capital)
         self.start = start
         self.end = end
-        self.market = Market(start = start, end = end, interval = interval)
+        self.market = MarketEvent(start = start, end = end, interval = interval)
         
         self.metrics = {}
         
@@ -129,7 +129,7 @@ class SubEnv:
         
         self.start = start
         self.end = end
-        self.market = Market(start = start, end = end, interval = interval)
+        self.market = MarketEvent(start = start, end = end, interval = interval)
         
         
     def get_state(self):

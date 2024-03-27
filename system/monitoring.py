@@ -5,6 +5,7 @@ class Monitoring:
     def __init__(self, capital):
         self.processor = Processor(capital)
         
+        
     
     def transform_trade_data(self, agentId, journal):
         self.tradesData = journal.tradesData.copy()

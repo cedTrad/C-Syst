@@ -3,7 +3,7 @@ from .portfolio_manager import Asset, Portfolio
 from .monitoring import Monitoring
 from .report import Report
 
-from .event import Event
+from .event import MarketEvent, Event
 
 from evalutation.postprocessor import Postprocessor
 
@@ -15,7 +15,11 @@ class Agent:
     def __init__(self, Id, capital, env):
         self.Id = Id[0]
         self.symbol = Id[1]
+        
+        self.init_capital = capital
         self.capital = capital
+        
+        self.count_trade = 0
         
         self.env = env
         self.asset = Asset(self.symbol)
@@ -49,9 +53,17 @@ class Agent:
     
     def monitoring(self, signal = True):
         if signal[0] == "Close":
+            self.count_trade += 1
             journal = self.env.journal
             metrics = self.mtng.update_metric(self.Id, journal)
     
+    def monitoring2(self, data):
+        variable = ["pnl", "pnl_pct", "value"]
+        
+        
+        
+    def update_metric(self, signal = True):
+        ""
     
     def update_policy(self, name, params):
         self.policy.select_rule(name)
