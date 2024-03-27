@@ -3,11 +3,6 @@ import pandas as pd
 from dataEngine.data import connect_db
 from .retrocation.journal import Journal
 
-class Event:
-    
-    def __init__(self, date, price):
-        self.date = date
-        self.price = price
 
 
 class MarketEvent:
@@ -71,4 +66,4 @@ class PostEvent:
         self.add_portfolio_line(agentId, date, asset.symbol, portfolio)
         
     def get_combined_data(self):
-        data = pd.concat([self.tradesData, self.portfolioData], axis=1)
+        combined_trade = pd.concat([self.tradesData, self.portfolioData], axis=1)

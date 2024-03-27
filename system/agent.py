@@ -3,12 +3,17 @@ from .portfolio_manager import Asset, Portfolio
 from .monitoring import Monitoring
 from .report import Report
 
-from .event import MarketEvent, Event
-
 from evalutation.postprocessor import Postprocessor
 
 import time
 from IPython.display import clear_output
+
+
+class Event:
+    
+    def __init__(self, date, price):
+        self.date = date
+        self.price = price
 
 class Agent:
     
@@ -48,23 +53,24 @@ class Agent:
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
+        
         return next_state, reward, event, signalAction
     
     
-    def monitoring(self, signal = True):
+    def update_metric(self, signal = True):
         if signal[0] == "Close":
             self.count_trade += 1
             journal = self.env.journal
             metrics = self.mtng.update_metric(self.Id, journal)
     
-    def monitoring2(self, data):
-        variable = ["pnl", "pnl_pct", "value"]
-        
-        
-        
-    def update_metric(self, signal = True):
-        ""
     
+    def monitoring(self, i):
+        tradeData = self.env.post_event.tradesData
+        f_var = ["pnl", "pnl_pct", "value"]
+        tradeData.iloc[i][f_var]
+        
+        
+
     def update_policy(self, name, params):
         self.policy.select_rule(name)
         self.policy.update_signal_params(params=params)
@@ -78,10 +84,8 @@ class Agent:
                 next_state, reward, event, signal = self.update(state)
                 state = next_state
                 i += 1
-                
-                print(f" Agent : {self.Id}")
-                print(f" i {i}")
-                self.monitoring(signal["state"])
+                self.monitoring()
+                print(f" Agent : {self.Id}")                
                 
             except StopIteration:
                 break

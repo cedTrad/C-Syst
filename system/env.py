@@ -3,7 +3,7 @@ from .portfolio_manager import PFuture, Asset
 
 from .retrocation.journal import Journal
 
-from .event import MarketEvent
+from .event import MarketEvent, PostEvent
 
 from evalutation.reporting import GReport, IReport
 
@@ -11,7 +11,7 @@ signalAction = ["Open", "Close", "Resize", "-", None]
 riskAction = ["quantity", "leverage", "closePrice", "sl", "tp"]
 
 
-class Env:
+class GEnv:
     
     def __init__(self, symbols, capital, interval = "1d", start = "2023", end = "2023"):
         self.symbols = symbols
@@ -19,10 +19,12 @@ class Env:
         self.init_capital = capital
         self.data = {}
         
-        self.journal = Journal()
+        self.post_event = PostEvent()
+        
         self.portfolio = PFuture("Binance", capital)
         self.start = start
         self.end = end
+        
         self.market = MarketEvent(start = start, end = end, interval = interval)
         
         self.metrics = {}
@@ -62,7 +64,7 @@ class Env:
                      signalAction = signalAction, riskAction = riskAction, paper_mode=paper_mode)
         
         self.portfolio.update(asset = asset)
-        self.journal.add_data(agentId = agentId, date = event.date, price = event.price,
+        self.post_event.add_data(agentId = agentId, date = event.date, price = event.price,
                               asset = asset, portfolio = self.portfolio)
         
         state = self.get_state()
@@ -71,40 +73,7 @@ class Env:
         
         return state, reward
     
-    
-    def config_agents(self, agentIds):
-        self.agentIds = agentIds
-        self.greport = GReport(agentIds, db=self.market.db)
-    
-    
-    def pos_data(self):
-        self.tradesData, self.portfolioData = self.journal.tradesData, self.journal.portfolioData
-        
-    
-    def get_viz(self, agentId, symbol):
-        self.pos_data()
-        self.ireport = IReport(agentId, db=self.market.db)
-        
-        self.ireport.load(self.tradesData, self.portfolioData)
-        
-        fig0, fig1 = self.ireport.benchmark(symbol)
-        fig0.show()
-        
-        fig = self.ireport.plot_asset(symbol)
-        fig.show()
-        
-        fig1.show()
-        
-    
-    
-    def globalReport(self):
-        self.pos_data()
-        self.greport.load(self.tradesData, self.portfolioData)
-        fig_e = self.greport.compare()
-        
-        fig_e.show()
-        
-    
+
     
     def reset(self):
         self.init_portfolio()
@@ -116,14 +85,15 @@ class Env:
 
 
 
-class SubEnv:
+class Env:
     
     def __init__(self, symbol, capital, interval = "1d", start = "2023", end = "2023"):
         self.symbol = symbol
         self.capital = capital
         self.data = {}
         
-        self.journal = Journal()
+        self.post_event = PostEvent()
+        
         self.portfolio = PFuture("Binance", capital)
         self.portfolio.add_asset(symbol)
         
@@ -154,7 +124,8 @@ class SubEnv:
         self.execute(asset = asset, price = event.price, signalAction = signalAction,
                      riskAction = riskAction, paper_mode=paper_mode)
         self.portfolio.update(asset = asset)
-        self.journal.add_data(agentId = agentId[0], date = event.date, price = event.price,
+        
+        self.post_event.add_data(agentId = agentId[0], date = event.date, price = event.price,
                               asset = asset, portfolio = self.portfolio)
         
         state = self.get_state()
