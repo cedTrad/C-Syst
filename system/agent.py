@@ -33,7 +33,7 @@ class Agent:
         self.postindicator = []
         
         self.policy = Politic(capital = capital)
-        self.mtng = Monitoring(capital)
+        self.mtng = Monitoring()
         
         self.gen_data = self.env.market.get_data(self.symbol)
         
@@ -49,12 +49,12 @@ class Agent:
         return signalAction, riskAction
     
     
-    def update(self, state, paper_mode=True):
+    def execute(self, state, paper_mode=True):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
         
-        return next_state, reward, event, signalAction
+        return next_state, reward, event, signalAction, riskAction
     
     
     def update_metric(self, signal = True):
@@ -65,9 +65,9 @@ class Agent:
     
     
     def monitoring(self, i):
-        tradeData = self.env.post_event.tradesData
+        tradeData = self.env.post_event.tradeData
         f_var = ["pnl", "pnl_pct", "value"]
-        tradeData.iloc[i][f_var]
+        tradeData.iloc[i]
         
         
 
@@ -81,11 +81,15 @@ class Agent:
         i = 0
         while True:
             try:
-                next_state, reward, event, signal = self.update(state)
+                next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
+                print(signalAction)
+                print("i : ",i)
+                if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
+                    self.monitoring(i)
+                
                 i += 1
-                self.monitoring()
-                print(f" Agent : {self.Id}")                
+                print(f" Agent : {self.Id} - {self.symbol}")                
                 
             except StopIteration:
                 break
@@ -93,7 +97,8 @@ class Agent:
     
     def view_report(self):
         db = self.env.market.db
-        report = Report(db, self.mtng)
+        post_event = self.env.post_event
+        report = Report(db, post_event)
         report.plot_equity(self.Id)
            
     

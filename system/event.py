@@ -1,7 +1,6 @@
 import pandas as pd
 
 from dataEngine.data import connect_db
-from .retrocation.journal import Journal
 
 
 
@@ -32,8 +31,8 @@ class PostEvent:
     
     def __init__(self):
         self.portfolioData = pd.DataFrame()
-        self.metricsData = pd.DataFrame()
-        self.tradesData = pd.DataFrame()
+        self.metricData = pd.DataFrame()
+        self.tradeData = pd.DataFrame()
         
         
     def add_trade_line(self, agentId, date, price, asset):
@@ -44,7 +43,7 @@ class PostEvent:
                 'value' : asset.value, 'pnl' : asset.pnl, 'pnl_pct' : asset.pnl_pct,
                 'symbol' : asset.symbol}
         add = pd.DataFrame(line , index = [date])
-        self.tradesData = pd.concat([self.tradesData, add], ignore_index = True)
+        self.tradeData = pd.concat([self.tradeData, add], ignore_index = True)
         
         
     def add_portfolio_line(self, agentId, date, symbol, portfolio):
@@ -58,7 +57,7 @@ class PostEvent:
     
     def add_metrics_line(self, date, line):
         add = pd.DataFrame(line, index=[date])
-        self.metricsData = pd.concat([self.metricsData, add], ignore_index=True)
+        self.metricData = pd.concat([self.metricData, add], ignore_index=True)
         
         
     def add_data(self, agentId, date, price, asset, portfolio):
@@ -66,4 +65,4 @@ class PostEvent:
         self.add_portfolio_line(agentId, date, asset.symbol, portfolio)
         
     def get_combined_data(self):
-        combined_trade = pd.concat([self.tradesData, self.portfolioData], axis=1)
+        combined_trade = pd.concat([self.tradeData, self.portfolioData], axis=1)

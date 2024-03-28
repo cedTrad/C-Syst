@@ -1,8 +1,6 @@
 from .ffc.fsm import FSM
 from .portfolio_manager import PFuture, Asset
 
-from .retrocation.journal import Journal
-
 from .event import MarketEvent, PostEvent
 
 from evalutation.reporting import GReport, IReport
@@ -124,10 +122,8 @@ class Env:
         self.execute(asset = asset, price = event.price, signalAction = signalAction,
                      riskAction = riskAction, paper_mode=paper_mode)
         self.portfolio.update(asset = asset)
-        
-        self.post_event.add_data(agentId = agentId[0], date = event.date, price = event.price,
+        self.post_event.add_data(agentId = agentId, date = event.date, price = event.price,
                               asset = asset, portfolio = self.portfolio)
-        
         state = self.get_state()
         
         if "Close" in signalAction["state"]:

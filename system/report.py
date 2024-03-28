@@ -1,16 +1,20 @@
+from .retrocation.processor import Processor
 from .viz import Benchmark
 
 
 class Report:
     
-    def __init__(self, db, monitoring):
+    def __init__(self, db, post_event):
         self.db = db
-        self.tradeData = monitoring.tradeDataAgent
-        self.portfolioData = monitoring.portfolioDataAgent
-        self.metricData = monitoring.metricDataAgent
+        self.processor = Processor()
+        self.tradeData = post_event.tradeData
+        self.portfolioData = post_event.portfolioData
+        self.metricData = post_event.metricData
         
     
     def processing(self, agentId):
+        self.processor.transform(self.tradeData, self.portfolioData)
+        
         symbol = self.tradeData.iloc[0]["symbol"]
         data = self.db.get_data(symbol)
         AgentId = {"Id" : agentId, "symbol" : symbol,

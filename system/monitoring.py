@@ -2,8 +2,8 @@ from .retrocation.processor import Processor
 
 class Monitoring:
     
-    def __init__(self, capital):
-        self.processor = Processor(capital)
+    def __init__(self):
+        self.processor = Processor()
         
         
     
