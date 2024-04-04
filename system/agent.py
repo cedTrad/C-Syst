@@ -1,6 +1,6 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
-from .monitoring import Monitoring
+from .following import Following
 from .report import Report
 
 from evalutation.postprocessor import Postprocessor
@@ -15,11 +15,12 @@ class Event:
         self.date = date
         self.price = price
 
+
 class Agent:
     
-    def __init__(self, Id, capital, env):
-        self.Id = Id[0]
-        self.symbol = Id[1]
+    def __init__(self, agentId, capital, env):
+        self.agentId = agentId      # agent = (Id, symbol)
+        self.symbol = agentId[1]
         
         self.init_capital = capital
         self.capital = capital
@@ -27,13 +28,15 @@ class Agent:
         self.count_trade = 0
         
         self.env = env
+        self.env.initialize_portfolio(capital)
+        
         self.asset = Asset(self.symbol)
         
         self.fitness = []
         self.postindicator = []
         
         self.policy = Politic(capital = capital)
-        self.mtng = Monitoring()
+        self.following = Following()
         
         self.gen_data = self.env.market.get_data(self.symbol)
         
@@ -52,24 +55,14 @@ class Agent:
     def execute(self, state, paper_mode=True):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
+        next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, paper_mode)
         
         return next_state, reward, event, signalAction, riskAction
     
     
-    def update_metric(self, signal = True):
-        if signal[0] == "Close":
-            self.count_trade += 1
-            journal = self.env.journal
-            metrics = self.mtng.update_metric(self.Id, journal)
-    
-    
-    def monitoring(self, i):
-        tradeData = self.env.post_event.tradeData
-        f_var = ["pnl", "pnl_pct", "value"]
-        tradeData.iloc[i]
-        
-        
+    def follow(self, i):
+        db = self.env.market.db
+        post_event = self.env.post_event
 
     def update_policy(self, name, params):
         self.policy.select_rule(name)
