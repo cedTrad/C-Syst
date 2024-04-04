@@ -1,30 +1,43 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
-from .monitoring import Monitoring
+from .following import Following
 from .report import Report
-
-from .event import Event
 
 from evalutation.postprocessor import Postprocessor
 
 import time
 from IPython.display import clear_output
 
+
+class Event:
+    
+    def __init__(self, date, price):
+        self.date = date
+        self.price = price
+
+
 class Agent:
     
-    def __init__(self, Id, capital, env):
-        self.Id = Id[0]
-        self.symbol = Id[1]
+    def __init__(self, agentId, capital, env):
+        self.agentId = agentId      # agent = (Id, symbol)
+        self.symbol = agentId[1]
+        
+        self.init_capital = capital
         self.capital = capital
         
+        self.count_trade = 0
+        
         self.env = env
+        self.env.initialize_portfolio(capital)
+        
         self.asset = Asset(self.symbol)
+        
+        self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
         
         self.fitness = []
         self.postindicator = []
         
         self.policy = Politic(capital = capital)
-        self.mtng = Monitoring(capital)
         
         self.gen_data = self.env.market.get_data(self.symbol)
         
@@ -40,19 +53,21 @@ class Agent:
         return signalAction, riskAction
     
     
-    def update(self, state, paper_mode=True):
+    def execute(self, state, paper_mode=True):
         event = self.get_event()
         signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.Id, self.asset, event, signalAction, riskAction, paper_mode)
-        return next_state, reward, event, signalAction
+        next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, paper_mode)
+        
+        return next_state, reward, event, signalAction, riskAction
     
     
-    def monitoring(self, signal = True):
-        if signal[0] == "Close":
-            journal = self.env.journal
-            metrics = self.mtng.update_metric(self.Id, journal)
-    
-    
+    def follow(self, i):
+        #db = self.env.market.db
+        #post_event = self.env.post_event
+        #self.following = Following(db=db, post_event=post_event)
+        self.following.execute(self.agentId)
+        
+
     def update_policy(self, name, params):
         self.policy.select_rule(name)
         self.policy.update_signal_params(params=params)
@@ -63,22 +78,22 @@ class Agent:
         i = 0
         while True:
             try:
-                next_state, reward, event, signal = self.update(state)
+                next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
-                i += 1
+                print(signalAction)
+                print("i : ",i)
+                if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
+                    self.follow(i)
                 
-                print(f" Agent : {self.Id}")
-                print(f" i {i}")
-                self.monitoring(signal["state"])
+                i += 1
+                print(f" Agent : {self.agentId} ")
                 
             except StopIteration:
                 break
             
     
     def view_report(self):
-        db = self.env.market.db
-        report = Report(db, self.mtng)
-        report.plot_equity(self.Id)
+        self.following.plot_equity()
            
     
     def learn(self):

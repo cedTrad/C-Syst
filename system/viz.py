@@ -16,20 +16,20 @@ class Benchmark:
         
         
     def preprocess(self):
+        self.tradeDataAgent.set_index('date', inplace = True)
+        self.portfolioDataAgent.set_index('date', inplace = True)
+        
         self.capital = self.portfolioDataAgent["capital"]
         self.tradeDataAgent["benchmark"] = self.tradeDataAgent["cum_price"]
         
         
-    def equity(self):
-        agentId = self.tradeDataAgent.iloc[0]["agentId"]
-        symbol = self.tradeDataAgent.iloc[0]["symbol"]
-        
+    def equity(self, agentId):
         fig = subplot(nb_cols = 1, nb_rows = 2, row_heights=[0.7, 0.3])
         add_line(fig, data=self.tradeDataAgent, feature="benchmark", name=f"{agentId} : market", col=1, row=1)
         
-        add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"{agentId} : {symbol}", col=1, row=1)
-        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets {agentId} : {symbol}", col=1, row=1)
-        #add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId} : {symbol}", col=1, row=1)
+        add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"{agentId}", col=1, row=1)
+        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets {agentId}", col=1, row=1)
+        #add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId}", col=1, row=1)
         
         add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : drawdown", col=1, row=2)
         
@@ -67,10 +67,8 @@ class Benchmark:
         color_trades(fig=fig, col=col, row=row, entry=entryPoints, exit=exitPoints, opacity=0.2)
         
         
-    def asset(self, data):
-        
-        agentId = self.tradeDataAgent.iloc[0]["agentId"]
-        symbol = self.tradeDataAgent.iloc[0]["symbol"]
+    def asset(self, data, agentId):
+        symbol = agentId[1]
         
         fig = subplots(nb_rows=3, nb_cols=1, row_heights=[0.15, 0.7, 0.15])
         
