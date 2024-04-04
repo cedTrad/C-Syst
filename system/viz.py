@@ -24,14 +24,15 @@ class Benchmark:
         
         
     def equity(self, agentId):
+        print(agentId)
         fig = subplot(nb_cols = 1, nb_rows = 2, row_heights=[0.7, 0.3])
-        add_line(fig, data=self.tradeDataAgent, feature="benchmark", name=f"{agentId} : market", col=1, row=1)
+        add_line(fig, data=self.tradeDataAgent, feature="benchmark", name=f"market", col=1, row=1)
         
-        add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"{agentId}", col=1, row=1)
-        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets {agentId}", col=1, row=1)
+        add_bar(fig=fig, data=self.tradeDataAgent, feature='pnl_pct', name=f"pnl pct", col=1, row=1)
+        add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f" cum rets", col=1, row=1)
         #add_line(fig, data=self.tradeDataAgent, feature="cum_rets", name=f" cum rets asset {agentId}", col=1, row=1)
         
-        add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"{agentId} : drawdown", col=1, row=2)
+        add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"drawdown", col=1, row=2)
         
         fig.update_layout(height = 500 , width = 1000,
                           legend = dict(orientation="h",
