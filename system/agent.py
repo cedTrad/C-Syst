@@ -36,7 +36,6 @@ class Agent:
         self.postindicator = []
         
         self.policy = Politic(capital = capital)
-        self.following = Following()
         
         self.gen_data = self.env.market.get_data(self.symbol)
         
@@ -63,6 +62,9 @@ class Agent:
     def follow(self, i):
         db = self.env.market.db
         post_event = self.env.post_event
+        self.following = Following(db=db, post_event=post_event)
+        self.following.execute(self.agentId)
+
 
     def update_policy(self, name, params):
         self.policy.select_rule(name)
@@ -79,20 +81,17 @@ class Agent:
                 print(signalAction)
                 print("i : ",i)
                 if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
-                    self.monitoring(i)
+                    self.follow(i)
                 
                 i += 1
-                print(f" Agent : {self.Id} - {self.symbol}")                
+                print(f" Agent : {self.agentId} - {self.symbol}")                
                 
             except StopIteration:
                 break
             
     
     def view_report(self):
-        db = self.env.market.db
-        post_event = self.env.post_event
-        report = Report(db, post_event)
-        report.plot_equity(self.Id)
+        self.following.plot_equity()
            
     
     def learn(self):

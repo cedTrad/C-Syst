@@ -45,7 +45,7 @@ class Following:
         print(self.portfolioData.iloc[-1][p_var])
     
     
-    def follow(self, agentId):
+    def execute(self, agentId):
         self.process_agent_data(agentId)
         self.show()
     
