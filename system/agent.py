@@ -32,6 +32,8 @@ class Agent:
         
         self.asset = Asset(self.symbol)
         
+        self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
+        
         self.fitness = []
         self.postindicator = []
         
@@ -60,11 +62,11 @@ class Agent:
     
     
     def follow(self, i):
-        db = self.env.market.db
-        post_event = self.env.post_event
-        self.following = Following(db=db, post_event=post_event)
+        #db = self.env.market.db
+        #post_event = self.env.post_event
+        #self.following = Following(db=db, post_event=post_event)
         self.following.execute(self.agentId)
-
+        
 
     def update_policy(self, name, params):
         self.policy.select_rule(name)
@@ -84,7 +86,7 @@ class Agent:
                     self.follow(i)
                 
                 i += 1
-                print(f" Agent : {self.agentId} - {self.symbol}")                
+                print(f" Agent : {self.agentId} ")
                 
             except StopIteration:
                 break

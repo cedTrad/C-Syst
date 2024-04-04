@@ -21,8 +21,7 @@ class APostprocessing:
     
     
     def transform(self, trade):
-        trade.drop(columns = ['key'], inplace = True, errors = 'ignore')
-        trade.set_index('date', inplace = True)
+        #trade.set_index('date', inplace = True)
         trade["status"] = trade["state"].apply(lambda x : ast.literal_eval(x)[0])
         
         self.add_trade_features(trade)
@@ -51,8 +50,6 @@ class PPostprocessing:
         self.drawdown(portfolio)
     
     def transform(self, portfolio):
-        portfolio.set_index("date", inplace = True)
-        
         self.add_features(portfolio)
     
     

@@ -17,9 +17,8 @@ class Following:
     def __init__(self, db, post_event):
         self.db = db
         self.processor = Processor()
-        self.tradeData = post_event.tradeData
-        self.portfolioData = post_event.portfolioData
-        self.metricData = post_event.metricData
+        self.post_event = post_event
+        
         
     def update_metrics(self):
         ""
@@ -27,13 +26,16 @@ class Following:
     def process_agent_data(self, agentId):
         """
         Traite les données associées à un agent de trading donné.
-        
         Args:
             agent_id (tuple): Identifiant de l'agent de trading.
         
         Returns:
             dict: Données traitées de l'agent.
         """
+        self.tradeData = self.post_event.tradeData
+        self.portfolioData = self.post_event.portfolioData
+        self.metricData = self.post_event.metricData
+        
         self.processor.transform(self.tradeData, self.portfolioData)
         self.agent_data = AgentData(agentId, self.tradeData, self.portfolioData, self.metricData)
         
@@ -47,20 +49,22 @@ class Following:
     
     def execute(self, agentId):
         self.process_agent_data(agentId)
-        self.show()
+        #self.show()
     
     
     def plot_equity(self):
         tradeDataAgent = self.agent_data.trade_data
         portfolioDataAgent = self.agent_data.portfolio_data
         data = self.db.get_data(self.agent_data.agent_id[1])
-    
+        
+        agentId = self.agent_data.agent_id
+        
         benchmark = Benchmark(tradeDataAgent, portfolioDataAgent)
         
-        fig_equity = benchmark.equity()
+        fig_equity = benchmark.equity(agentId)
         fig_equity.show()
         
-        fig_asset = benchmark.asset(data)
+        fig_asset = benchmark.asset(data, agentId)
         fig_asset.show()
     
     
