@@ -1,6 +1,5 @@
 from .ffc.fsm import FSM
 from .portfolio_manager import PFuture
-
 from .event import MarketEvent, PostEvent
 
 
@@ -28,7 +27,7 @@ class GEnv:
         for symbol in self.symbols:
             self.portfolio.add_asset(symbol)
         
-
+        
     def g_report(self):
         ""
 
@@ -49,6 +48,7 @@ class Env:
         self.init_capital = capital
         self.portfolio = PFuture("Binance", capital)
         self.portfolio.add_asset(self.symbol)
+        self.capital = self.portfolio.capital
         
         
     def get_state(self):
@@ -81,7 +81,6 @@ class Env:
             reward = asset.pnl
         
         return state, reward
-    
     
         
     def reset(self):
