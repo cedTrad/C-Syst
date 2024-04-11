@@ -1,41 +1,38 @@
-import pandas as pd
 import numpy as np
-
 
 class CPPI:
     
     def __init__(self, capital):
         #self.capital = capital
         self.init_capital = capital
+        self.peak = capital
         
         
-    def update_value(self, m, floor, drawdown = None):
-        self.m = m
+    def update_params(self, floor, drawdown = None):
         self.floor = floor
         self.drawdown = drawdown
-    
-    
-    def update(self, capital):
-        self.capital = capital
-    
-    
-    def execute(self, leverage = 1):    
+        
+        
+    def update_capital(self, capital):
+        self.current_capital = capital
+        #self.risk_value = self.current_capital * self.risk_w
+        
+        
+    def get_floor_value(self, stop_loss_pct = None):
         if self.drawdown is not None:
-            peak = np.maximum(self.capital , peak)
-            self.floor_value = (1 - self.drawdown)*peak
+            self.peak = np.maximum(self.current_capital, self.peak)
+            floor_value = (1 - self.drawdown) * self.peak
         else:
-            self.floor_value = self.init_capital*self.floor
-        # Cushion
-        self.cushion = (self.capital - self.floor_value)/self.capital
+            floor_value = self.current_capital *self.floor
         
-        # Risky_weight
-        self.risky_w = self.m * self.cushion
+        self.floor_value = floor_value
+        return floor_value
         
-        # Borner risky_w, leverage
-        self.risky_w = np.minimum(self.risky_w, 1)
-        self.risky_w = np.maximum(self.risky_w, 0)
-        self.safe_w = 1 - self.risky_w
         
-        self.risky_value = self.capital * self.risky_w
-        self.safe_value = self.capital * self.safe_w
-        
+    def update_cushion(self):
+        cushion = (self.current_capital - self.floor_value) / self.current_capital
+        return cushion
+    
+    
+
+    

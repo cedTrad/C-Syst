@@ -24,28 +24,27 @@ class Agent:
         
         self.init_capital = capital
         self.capital = capital
-        
-        self.count_trade = 0
+        self.fitness = []
         
         self.env = env
         self.env.initialize_portfolio(capital)
+        self.gen_data = self.env.market.get_data(self.symbol)
+        self.capital = self.env.capital
         
         self.asset = Asset(self.symbol)
-        
-        self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
-        
-        self.fitness = []
-        self.postindicator = []
-        
         self.policy = Politic(capital = capital)
-        
-        self.gen_data = self.env.market.get_data(self.symbol)
+        self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
         
     
     def get_event(self):
         self.batchData = next(self.gen_data)
         return Event(date = self.batchData.index[-1], price = self.batchData.iloc[-1]["close"])
-        
+    
+    
+    def update_policy(self, name, params):
+        self.policy.select_rule(name)
+        self.policy.update_signal_params(params=params)
+    
     
     def act(self, state):
         signalAction, riskAction = self.policy.perform(batchData = self.batchData, portfolio = state["portfolio"],
@@ -57,20 +56,11 @@ class Agent:
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, paper_mode)
-        
         return next_state, reward, event, signalAction, riskAction
     
     
     def follow(self, i):
-        #db = self.env.market.db
-        #post_event = self.env.post_event
-        #self.following = Following(db=db, post_event=post_event)
         self.following.execute(self.agentId)
-        
-
-    def update_policy(self, name, params):
-        self.policy.select_rule(name)
-        self.policy.update_signal_params(params=params)
     
     
     def run_episode(self):
@@ -80,14 +70,10 @@ class Agent:
             try:
                 next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
-                print(signalAction)
-                print("i : ",i)
+                #print(f" Agent : {self.agentId} --- i : {i}")
                 if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
                     self.follow(i)
-                
                 i += 1
-                print(f" Agent : {self.agentId} ")
-                
             except StopIteration:
                 break
             

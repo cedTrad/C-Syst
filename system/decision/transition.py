@@ -1,7 +1,7 @@
 
 class Transition:
     
-    def __init__(self, signal, current_asset_position : int):
+    def __init__(self, signal, current_asset_position : int, risk_signal = ""):
         self.signal = signal
         self.current_asset_position = current_asset_position
         
@@ -27,6 +27,10 @@ class Transition:
             return False, ("", "")
         
         
+    def resize(self):
+        return
+        
+        
     def skip(self):
         if self.signal == "LONG" and self.current_asset_position == 1:
             return True, ("-", "LONG")
@@ -34,6 +38,8 @@ class Transition:
             return True, ("-", "SHORT")
         else:
             return False, ("", "")
+        
+    
 
         
         

@@ -1,34 +1,33 @@
 from .decision.signal import Signal
-from .decision.management import Management
+from .decision.risk_manager import RiskManager
 from .decision.transition import Transition
 
 
 class Politic:
     
     def __init__(self, capital : float):
-        self.capital = capital
+        self.init_capital = capital
         self.signal = Signal()
-        self.management = Management(capital)
-    
-    
+        self.riskmanager = RiskManager(capital)
+
+
     def select_rule(self, policy_name):
         self.policy_name = policy_name
+
     
-        
     def signal_policy(self, signal):
         return signal
-    
-    
-    def risk_policy(self, available_amount, current_status):
-        amount = available_amount
-        return amount
-    
+
     
     def update_signal_params(self, params):
         self.params = params
     
+    def update_risk_params(self, params):
+        self.risk_params = params
     
-    def get_signal(self, batchData):
+    
+    
+    def signal_processing(self, batchData):
         self.signal.sets(batchData)
         self.rule = self.signal.rules.get(self.policy_name)
         if self.rule is None:
@@ -41,18 +40,30 @@ class Politic:
         return signal
     
     
-    def update_postindicator(self, indicator : dict):
-        self.indicator = indicator
+    def get_post_metric(self, metrics):
+        self.riskmanager.get_current_capital(metrics["capital"])
+    
+    
+    def risk_policy(self, available_amount, current_status):
+        self.riskmanager.config(floor=0.2) # update_risk_params
+        self.riskmanager.set_stop_loss()
+        risk_value, resize = self.riskmanager.update_risk()
+        
+        amount = available_amount
+        return amount
+    
     
     
     def perform(self, batchData, portfolio, current_asset_position):
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
         
+        self.get_post_metric(portfolio)
+        
         signalAction = {}
         riskAction = {}
         
         price = batchData.iloc[-1]["close"]
-        signal = self.get_signal(batchData)
+        signal = self.signal_processing(batchData)
         
         sl = False
         tp = False
@@ -60,7 +71,7 @@ class Politic:
         canOpenPosition, sideIn = Transition(signal, current_asset_position).get_in()
         canClosePosition, sideOut = Transition(signal, current_asset_position).get_out()
         skip, _ = Transition(signal, current_asset_position).skip()
-        
+        resize = 0
         if canOpenPosition:
             signalAction.update({"state" : sideIn + (sl, tp)})
             leverage = 1
