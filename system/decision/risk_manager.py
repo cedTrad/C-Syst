@@ -1,7 +1,7 @@
 import numpy as np
 
 from .risk.cppi import CPPI
-from .risk.profit import ProfitManager
+from .profit_manager import ProfitManager
 
 RISK_SIGNAL = ["Close", "Resize"]
 
@@ -21,6 +21,7 @@ class RiskManager:
         self.cppi = CPPI(capital=capital)
         self.profitmanager = ProfitManager
     
+    
     def get_metric(self):
         return
     
@@ -31,17 +32,14 @@ class RiskManager:
          
     def config_session_risk(self, params): # params = {"floor" : floor}
         self.cppi.update_params(**params)
+        self.cppi.get_floor_value()
     
     
     def update_session_capital(self, capital):
         self.session_capital = capital
     
-    def update_floor_value(self, params):
-        self.cppi.update_params(**params)
-        floor_value = self.cppi.get_floor_value()
     
-    
-    def update_risk(self, params = {"m" : 3}):
+    def update_risk(self, params = {"m" : 4}):
         m = params["m"]
         risk_w = self.cushion * m
         risk_w = np.minimum(risk_w, 1)
@@ -54,7 +52,7 @@ class RiskManager:
         self.cppi.get_current_capital(capital)
         self.cushion = self.cppi.update_cushion()
         
-        riskw = self.update_risk()
+        risk_w = self.update_risk()
         
     
     

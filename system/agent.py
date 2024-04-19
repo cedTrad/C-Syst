@@ -41,9 +41,10 @@ class Agent:
         return Event(date = self.batchData.index[-1], price = self.batchData.iloc[-1]["close"])
     
     
-    def update_policy(self, name, params):
+    def update_policy(self, name, params, session_risk_params):
         self.policy.select_rule(name)
         self.policy.update_signal_params(params=params)
+        self.policy.update_risk_params(session_params=session_risk_params)
     
     
     def act(self, state):

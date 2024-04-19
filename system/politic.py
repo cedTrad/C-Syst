@@ -10,25 +10,19 @@ class Politic:
         self.signal = Signal()
         self.riskmanager = RiskManager(capital)
 
-
     def select_rule(self, policy_name):
         self.policy_name = policy_name
 
-    
+
     def signal_policy(self, signal):
         return signal
-
     
     def update_signal_params(self, params):
-        self.params = params
-  
-    
-    def update_risk_params(self, floor = 0.2):
-        #self.risk_params = params
-        self.riskmanager.config(floor=floor) # update_risk_params
-        self.riskmanager.set_stop_loss()
-    
-    
+        self.signal_params = params
+      
+    def update_risk_params(self, session_params = {"floor":0.2}):
+        self.session_params = session_params
+
     
     def signal_processing(self, batchData):
         self.signal.sets(batchData)
@@ -36,31 +30,25 @@ class Politic:
         if self.rule is None:
             raise Exception("Policy name incorrect")
         
-        self.rule.update_params(self.params)
+        self.rule.update_params(self.signal_params)
         
         points = self.rule.run()
         signal = self.signal_policy(points)
         return signal
     
     
-    def get_post_metric(self, metrics):
-        self.riskmanager.get_current_capital(metrics["capital"])
-    
-    
-    def risk_policy(self, available_amount, current_status):
-        self.riskmanager.config(floor=0.2) # update_risk_params
-        self.riskmanager.set_stop_loss()
-        risk_value, resize = self.riskmanager.update_risk()
+    def risk_policy(self, portfolio, current_status):
+        current_capital = portfolio["capital"]
+        available_amount = portfolio["available_value"]
+        self.riskmanager.config_session_risk(self.session_params)
+        self.riskmanager.actuator(current_capital)
         
         amount = available_amount
         return amount
     
     
-    
     def perform(self, batchData, portfolio, current_asset_position):
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
-        
-        self.get_post_metric(portfolio)
         
         signalAction = {}
         riskAction = {}
@@ -75,10 +63,11 @@ class Politic:
         canClosePosition, sideOut = Transition(signal, current_asset_position).get_out()
         skip, _ = Transition(signal, current_asset_position).skip()
         resize = 0
+        
         if canOpenPosition:
             signalAction.update({"state" : sideIn + (sl, tp)})
             leverage = 1
-            amount = self.risk_policy(available_amount = available_amount, current_status="Open")
+            amount = self.risk_policy(portfolio=portfolio, current_status="Open")
             quantity = amount / price
             riskAction.update({"amount" : amount, "quantity" : quantity, "leverage" : leverage})
         
