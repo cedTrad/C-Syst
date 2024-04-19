@@ -21,40 +21,44 @@ class RiskManager:
         self.cppi = CPPI(capital=capital)
         self.profitmanager = ProfitManager
     
+    def get_metric(self):
+        return
     
-    def config(self, floor):
-        self.cppi.update_params(floor)
+    
+    def get_current_capital(self, capital):
+        self.current_capital = capital
+        
+         
+    def config_session_risk(self, params): # params = {"floor" : floor}
+        self.cppi.update_params(**params)
     
     
     def update_session_capital(self, capital):
         self.session_capital = capital
     
-    
-    def get_current_capital(self, capital):
-        self.current_capital = capital
-        self.cppi.get_current_capital(capital)
-    
-    
-    def set_stop_loss(self):
+    def update_floor_value(self, params):
+        self.cppi.update_params(**params)
         floor_value = self.cppi.get_floor_value()
-        stop_loss = floor_value
     
     
-    def update_floor(self):
-        return
-    
-    
-    def update_risk(self):
-        self.cushion = self.cppi.update_cushion()
-        
-        m = 3
+    def update_risk(self, params = {"m" : 3}):
+        m = params["m"]
         risk_w = self.cushion * m
         risk_w = np.minimum(risk_w, 1)
         risk_w = np.maximum(risk_w, 0)
-        risk_value_re = self.current_capital * risk_w
+        return risk_w
+    
+    
+    def actuator(self, capital):
+        self.get_current_capital(capital)
+        self.cppi.get_current_capital(capital)
+        self.cushion = self.cppi.update_cushion()
         
-        resize = True
-        return risk_value_re, resize
+        riskw = self.update_risk()
+        
+    
+    
+    
     
     
     

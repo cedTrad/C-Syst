@@ -3,7 +3,6 @@ import numpy as np
 class CPPI:
     
     def __init__(self, capital):
-        #self.capital = capital
         self.session_capital = capital
         self.peak = capital
         
