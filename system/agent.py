@@ -1,11 +1,9 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
 from .following import Following
-from .report import Report
 
-from evalutation.postprocessor import Postprocessor
+from .session_manager import SessionManager
 
-import time
 from IPython.display import clear_output
 
 
@@ -34,7 +32,8 @@ class Agent:
         self.asset = Asset(self.symbol)
         self.policy = Politic(capital = capital)
         self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
-        
+        self.session = SessionManager(self.following)
+    
     
     def get_event(self):
         self.batchData = next(self.gen_data)
@@ -62,6 +61,7 @@ class Agent:
     
     def follow(self, i):
         self.following.execute(self.agentId)
+        self.session.actuator()
     
     
     def run_episode(self):
