@@ -21,9 +21,12 @@ class Politic:
     
     def update_signal_params(self, params):
         self.params = params
+  
     
-    def update_risk_params(self, params):
-        self.risk_params = params
+    def update_risk_params(self, floor = 0.2):
+        #self.risk_params = params
+        self.riskmanager.config(floor=floor) # update_risk_params
+        self.riskmanager.set_stop_loss()
     
     
     
