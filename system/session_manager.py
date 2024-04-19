@@ -16,8 +16,10 @@ class SessionManager:
         
         
     def report(self):
-        self.following.get_report()
-        
+        agent = self.following.agent_data
+        trade_data = agent.trade_data
+        portfolio_data = agent.portfolio_data
+        print(portfolio_data.iloc[-1])
         
     def update_risk_session_params(self):
         return
