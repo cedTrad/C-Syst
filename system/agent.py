@@ -63,7 +63,8 @@ class Agent:
     def follow(self, event, signal):
         if signal["state"][1] == "LONG" or signal["state"][1] == "SHORT":
             self.following.execute(self.agentId)
-            self.session.actuator()
+            tradeData = self.following.tradeData
+            self.session.actuator(tradeData)
             self.post_event.add_session(event.date, self.agentId[0], self.session.n_session)
         else:
             self.post_event.add_session(event.date, self.agentId[0], "-")

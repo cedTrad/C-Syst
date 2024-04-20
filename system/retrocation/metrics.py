@@ -15,10 +15,10 @@ class WTO:
         return len(self.nb)
     
     def winrate(self):
-        return sum([x for x in self.nb if x > 0])/sum(self.nb)
+        return sum([x for x in self.nb if x > 0])/len(self.nb)
     
     def lossrate(self):
-        return sum([x for x in self.nb if x <= 0])/sum(self.nb)
+        return sum([x for x in self.nb if x <= 0])/len(self.nb)
     
     def totalwin(self):
         return sum([x for x in self.amount if x > 0])
@@ -41,17 +41,9 @@ class WTO:
 
 class AMetric:
     
-    def __init__(self, tradesData):
-        self.tradesData = tradesData
-        self.nbTrades = 0
-        
+    def __init__(self):
+        self.nb_trades = 0
         self.wto = WTO()
-        
-        self.winTrades = 0
-        self.lossTrades = 0
-        
-        self.amoungWin = []
-        self.amoungLoss = []
         
     
     @staticmethod
@@ -79,10 +71,12 @@ class AMetric:
     
     def actuator(self, tradeData):
         pnl = tradeData.iloc[-1]["pnl"]
-        if tradeData.iloc[-1]["status"] == "Open":
+        status = tradeData.iloc[-1]["status"]
+        
+        if status == "Open":
             self.nb_trades += 1
             
-        elif tradeData.iloc[-1]["status"] == "Close":
+        elif status == "Close":
             if pnl > 0:
                 self.wto.nb.append(1)
                 self.wto.amount.append(pnl)

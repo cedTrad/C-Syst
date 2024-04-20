@@ -1,5 +1,4 @@
 from typing import Any
-from .metrics import AMetric
 from .postprocessing import APostprocessing, PPostprocessing
 
 
