@@ -19,7 +19,7 @@ class SessionManager:
         agent = self.following.agent_data
         trade_data = agent.trade_data
         portfolio_data = agent.portfolio_data
-        print(portfolio_data.iloc[-1])
+        display(portfolio_data.iloc[-1][["date", "capital", "cum_rets", "drawdown"]])
         
     def update_risk_session_params(self):
         return
@@ -27,13 +27,13 @@ class SessionManager:
     
     def actuator(self):
         if self.step == 0:
-            print("********* End Session *************")
+            print("__ End Session ____________")
             self.report()
             self.update_risk_session_params()
             self.update_step()
             
         if self.step == self.max_step :
-            print("********** Start Session **********")
+            print("__ Start Session ____________")
             #print(f"****** step : {self.step}")
             
         self.step = self.step - 1
