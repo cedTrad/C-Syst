@@ -82,7 +82,7 @@ class AMetric:
                 self.wto.amount.append(pnl)
             else:
                 self.wto.nb.append(-1)
-                self.wto.amount.append(-pnl)
+                self.wto.amount.append(pnl)
             
     
     def calculate(self):
@@ -104,6 +104,7 @@ class AMetric:
         
         return result
     
-
+    def reset(self):
+        self.wto = WTO()
 
     
