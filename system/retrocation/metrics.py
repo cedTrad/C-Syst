@@ -2,12 +2,51 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
+from dataclasses import dataclass, field
+from typing import List
+
+
+@dataclass
+class WTO:
+    nb: List[int] = field(default_factory=list)
+    amount: List[float] = field(default_factory=list)
+    
+    def nbtrades(self):
+        return len(self.nb)
+    
+    def winrate(self):
+        return sum([x for x in self.nb if x > 0])/sum(self.nb)
+    
+    def lossrate(self):
+        return sum([x for x in self.nb if x <= 0])/sum(self.nb)
+    
+    def totalwin(self):
+        return sum([x for x in self.amount if x > 0])
+    
+    def totalloss(self):
+        return sum([x for x in self.amount if x <= 0])
+    
+    def avgwin(self):
+        return np.mean([x for x in self.amount if x > 0])
+    
+    def avgloss(self):
+        return np.mean([x for x in self.amount if x <= 0])
+    
+    def expectancy(self):
+        return self.winrate() * self.avgwin() + self.lossrate() * self.avgloss()
+    
+    def profitfactor(self):
+        return self.totalwin() / self.totalloss() * (-1)
+
 
 class AMetric:
     
     def __init__(self, tradesData):
         self.tradesData = tradesData
         self.nbTrades = 0
+        
+        self.wto = WTO()
+        
         self.winTrades = 0
         self.lossTrades = 0
         
@@ -31,10 +70,6 @@ class AMetric:
     def calculate_skewness(r, n=8):
         return scipy.stats.skew(r) if len(r) > n else 0
     
-    @staticmethod
-    def expectancy(winRate, avgWin, avgLoss):
-        return winRate * avgWin + (1 - winRate) * avgLoss
-    
     staticmethod
     def sharpe_ratio(r):
         mean = AMetric.calculate_product(r)
@@ -43,44 +78,38 @@ class AMetric:
     
     
     def actuator(self, tradeData):
-        ""
-    
-    def update(self):
-        i = j = 0
-        while True:
-            j += 1
-            data = self.tradesData.iloc[i : j+1]
-            if self.tradesData.iloc[j]["status"] == "Close":
-                i = j+1
-                date = self.tradesData.index[j]
-                self.nbTrades += 1
-                pnl = self.tradesData.iloc[j]["pnl"]
-                
-                if pnl > 0:
-                    self.winTrades += 1
-                    self.amoungWin.append(pnl)
-                    self.amoungLoss.append(0)
-                    
-                else:
-                    self.lossTrades += 1
-                    self.amoungWin.append(0)
-                    self.amoungLoss.append(pnl)
-                    
-                winRate = self.winTrades / self.nbTrades
-                avgWin = np.mean(self.amoungWin)
-                avgLoss = np.mean(self.amoungLoss)
-                expectancy = AMetric.expectancy(winRate = winRate , avgWin = avgWin, avgLoss = avgLoss)
-                
-                profitFactor = np.sum(self.amoungWin) / np.sum(self.amoungLoss)*(-1)
-                
-                metric = {
-                    "date" : date,
-                    "nbTrades" : self.nbTrades,
-                    "winRate" : winRate,
-                    "expectancy" : expectancy,
-                    "profitFactor" : profitFactor,
-                }
-                yield metric
+        pnl = tradeData.iloc[-1]["pnl"]
+        if tradeData.iloc[-1]["status"] == "Open":
+            self.nb_trades += 1
             
+        elif tradeData.iloc[-1]["status"] == "Close":
+            if pnl > 0:
+                self.wto.nb.append(1)
+                self.wto.amount.append(pnl)
+            else:
+                self.wto.nb.append(-1)
+                self.wto.amount.append(-pnl)
+            
+    
+    def calculate(self):
+        winRate = self.wto.winrate()
+        lossRate = self.wto.lossrate()
+        amountWin = self.wto.totalwin()
+        amountLoss = self.wto.totalloss()
+        expectancy = self.wto.expectancy()
+        profitFactor = self.wto.profitfactor()
         
+        result = {
+            "winRate": winRate,
+            "lossRate": lossRate,
+            "amountWin": amountWin,
+            "amountLoss": amountLoss,
+            "expectancy": expectancy,
+            "profitFactor": profitFactor
+        }
+        
+        return result
+    
+
+
     
