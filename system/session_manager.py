@@ -9,7 +9,7 @@ class SessionManager:
         self.following = following
         self.max_step = 50
         self.step = 50
-        
+        self.n_session = 0
     
     def update_step(self, n = 50):
         self.step = n
@@ -19,7 +19,7 @@ class SessionManager:
         agent = self.following.agent_data
         trade_data = agent.trade_data
         portfolio_data = agent.portfolio_data
-        display(portfolio_data.iloc[-1][["date", "capital", "cum_rets", "drawdown"]])
+        #display(portfolio_data.iloc[-1][["date", "capital", "cum_rets", "drawdown"]])
         
     def update_risk_session_params(self):
         return
@@ -34,6 +34,7 @@ class SessionManager:
             
         if self.step == self.max_step :
             print("__ Start Session ____________")
+            self.n_session += 1
             #print(f"****** step : {self.step}")
             
-        self.step = self.step - 1
+        self.step -= 1

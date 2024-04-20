@@ -33,6 +33,8 @@ class PostEvent:
         self.portfolioData = pd.DataFrame()
         self.metricData = pd.DataFrame()
         self.tradeData = pd.DataFrame()
+        self.session = 0
+        self.data = pd.DataFrame()
         
         
     def add_trade_line(self, agentId, date, price, asset):
@@ -63,6 +65,11 @@ class PostEvent:
     def add_data(self, agentId, date, price, asset, portfolio):
         self.add_trade_line(agentId, date, price, asset)
         self.add_portfolio_line(agentId, date, asset.symbol, portfolio)
+    
+    
+    def add_session(self, date, agentId, n_session):
+        line = {"date" : date, "agentId" : agentId, "session":n_session}
+        add = pd.DataFrame(line, index=[date])
+        self.data = pd.concat([self.data, add], ignore_index=True)
         
-    def get_combined_data(self):
-        combined_trade = pd.concat([self.tradeData, self.portfolioData], axis=1)
+    

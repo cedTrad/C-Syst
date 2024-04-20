@@ -26,6 +26,7 @@ class Agent:
         
         self.env = env
         self.env.initialize_portfolio(capital)
+        self.post_event = self.env.post_event
         self.gen_data = self.env.market.get_data(self.symbol)
         self.capital = self.env.capital
         
@@ -56,12 +57,16 @@ class Agent:
         event = self.get_event()
         signalAction, riskAction = self.act(state)
         next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, paper_mode)
-        return next_state, reward, event, signalAction, riskAction
+        return event, next_state, reward, event, signalAction, riskAction
     
     
-    def follow(self, i):
-        self.following.execute(self.agentId)
-        self.session.actuator()
+    def follow(self, event, signal):
+        if signal["state"][1] == "LONG" or signal["state"][1] == "SHORT":
+            self.following.execute(self.agentId)
+            self.session.actuator()
+            self.post_event.add_session(event.date, self.agentId[0], self.session.n_session)
+        else:
+            self.post_event.add_session(event.date, self.agentId[0], "-")
     
     
     def run_episode(self):
@@ -69,11 +74,9 @@ class Agent:
         i = 0
         while True:
             try:
-                next_state, reward, event, signalAction, riskAction = self.execute(state)
+                event, next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
-                #print(f" Agent : {self.agentId} --- i : {i}")
-                if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
-                    self.follow(i)
+                self.follow(event=event, signal=signalAction)
                 i += 1
             except StopIteration:
                 break

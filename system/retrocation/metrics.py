@@ -42,6 +42,9 @@ class AMetric:
         return mean / std
     
     
+    def actuator(self, tradeData):
+        ""
+    
     def update(self):
         i = j = 0
         while True:
