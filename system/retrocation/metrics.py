@@ -10,6 +10,7 @@ from typing import List
 class WTO:
     nb: List[int] = field(default_factory=list)
     amount: List[float] = field(default_factory=list)
+    exposure : List[float] = field(default_factory=list)
     
     def nbtrades(self):
         return len(self.nb)
@@ -37,12 +38,19 @@ class WTO:
     
     def profitfactor(self):
         return self.totalwin() / self.totalloss() * (-1)
+    
+    def minexp(self):
+        return min(self.exposure)
+    
+    def maxexp(self):
+        return max(self.exposure)
 
 
 class AMetric:
     
     def __init__(self):
         self.nb_trades = 0
+        self.len_trade = 0
         self.wto = WTO()
         
     
@@ -68,21 +76,31 @@ class AMetric:
         std = np.std(r)
         return mean / std
     
+    def exposition(self):
+        return
     
     def actuator(self, tradeData):
         pnl = tradeData.iloc[-1]["pnl"]
         status = tradeData.iloc[-1]["status"]
+        current_position = tradeData.iloc[-1]["position"]
         
         if status == "Open":
             self.nb_trades += 1
+            self.len_trade += 1
             
         elif status == "Close":
+            self.len_trade += 1
+            self.wto.exposure.append(self.len_trade)
+            self.len_trade = 0
             if pnl > 0:
                 self.wto.nb.append(1)
                 self.wto.amount.append(pnl)
             else:
                 self.wto.nb.append(-1)
                 self.wto.amount.append(pnl)
+        
+        if current_position != 0:
+            self.len_trade += 1
             
     
     def calculate(self):
@@ -93,6 +111,8 @@ class AMetric:
         amountLoss = self.wto.totalloss()
         expectancy = self.wto.expectancy()
         profitFactor = self.wto.profitfactor()
+        minExposure = self.wto.minexp()
+        maxExposure = self.wto.maxexp()
         
         result = {
             "nbTrades" : nbTrades,
@@ -101,7 +121,9 @@ class AMetric:
             "amountWin": amountWin,
             "amountLoss": amountLoss,
             "expectancy": expectancy,
-            "profitFactor": profitFactor
+            "profitFactor": profitFactor,
+            "minExposure" : minExposure,
+            "maxExposure" : maxExposure
         }
         
         return result
