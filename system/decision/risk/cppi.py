@@ -3,8 +3,7 @@ import numpy as np
 class CPPI:
     
     def __init__(self, capital):
-        #self.capital = capital
-        self.init_capital = capital
+        self.session_capital = capital
         self.peak = capital
         
         
@@ -13,7 +12,7 @@ class CPPI:
         self.drawdown = drawdown
         
         
-    def update_capital(self, capital):
+    def get_current_capital(self, capital):
         self.current_capital = capital
         #self.risk_value = self.current_capital * self.risk_w
         
@@ -23,7 +22,7 @@ class CPPI:
             self.peak = np.maximum(self.current_capital, self.peak)
             floor_value = (1 - self.drawdown) * self.peak
         else:
-            floor_value = self.current_capital *self.floor
+            floor_value = self.session_capital *self.floor
         
         self.floor_value = floor_value
         return floor_value

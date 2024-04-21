@@ -33,23 +33,25 @@ class PostEvent:
         self.portfolioData = pd.DataFrame()
         self.metricData = pd.DataFrame()
         self.tradeData = pd.DataFrame()
+        self.session = 0
+        self.data = pd.DataFrame()
         
         
-    def add_trade_line(self, agentId, date, price, asset):
+    def add_trade_line(self, agentId, date, price, asset, n_session):
         line = {'agentId' : agentId, 'date' : date, 'price' : price, 
                 'quantity' : asset.quantity, 'position' : asset.position,
                 'side' : asset.type, 'state' : str(asset.state),
                 'in_value' : asset.in_value, 'out_value' : asset.out_value,
                 'value' : asset.value, 'pnl' : asset.pnl, 'pnl_pct' : asset.pnl_pct,
-                'symbol' : asset.symbol}
+                'symbol' : asset.symbol, "session" : n_session}
         add = pd.DataFrame(line , index = [date])
         self.tradeData = pd.concat([self.tradeData, add], ignore_index = True)
         
         
-    def add_portfolio_line(self, agentId, date, symbol, portfolio):
-        line = {'agentId' : agentId, 'date' : date, 'risk_value' : portfolio.risk_value,
-                'available_value' : portfolio.available_value,
-                'capital' : portfolio.capital, "symbol" : symbol}
+    def add_portfolio_line(self, agentId, date, symbol, portfolio, n_session):
+        line = {'agentId' : agentId, 'date' : date,
+                'risk_value' : portfolio.risk_value, 'available_value' : portfolio.available_value,
+                'capital' : portfolio.capital, "symbol" : symbol, "session" : n_session}
         
         add = pd.DataFrame(line, index = [date])
         self.portfolioData = pd.concat([self.portfolioData, add], ignore_index = True)
@@ -60,9 +62,14 @@ class PostEvent:
         self.metricData = pd.concat([self.metricData, add], ignore_index=True)
         
         
-    def add_data(self, agentId, date, price, asset, portfolio):
-        self.add_trade_line(agentId, date, price, asset)
-        self.add_portfolio_line(agentId, date, asset.symbol, portfolio)
+    def add_data(self, agentId, date, price, asset, portfolio, n_session):
+        self.add_trade_line(agentId, date, price, asset, n_session)
+        self.add_portfolio_line(agentId, date, asset.symbol, portfolio, n_session)
+    
+    
+    def add_session(self, date, agentId, n_session):
+        line = {"date" : date, "agentId" : agentId, "session":n_session}
+        add = pd.DataFrame(line, index=[date])
+        self.data = pd.concat([self.data, add], ignore_index=True)
         
-    def get_combined_data(self):
-        combined_trade = pd.concat([self.tradeData, self.portfolioData], axis=1)
+    

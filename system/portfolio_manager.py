@@ -53,7 +53,6 @@ class Asset:
             self.pnl_pct = self.pnl / self.in_value if self.in_value !=0 else 0
         
         self.value = self.get_value(price)
-        
         self.value_re = self.value if self.state[0] == ("Close") else self.value+self.out_value
         
 

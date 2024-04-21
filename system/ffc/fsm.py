@@ -58,6 +58,7 @@ class FSM:
         
         # --------------------------------------------------------   ---------
         else:
+            print(self.signal_action)
             succes = False
         
         return succes

@@ -2,17 +2,56 @@ import pandas as pd
 import numpy as np
 import scipy.stats
 
+from dataclasses import dataclass, field
+from typing import List
+
+
+@dataclass
+class WTO:
+    nb: List[int] = field(default_factory=list)
+    amount: List[float] = field(default_factory=list)
+    exposure : List[float] = field(default_factory=list)
+    
+    def nbtrades(self):
+        return len(self.nb)
+    
+    def winrate(self):
+        return sum([x for x in self.nb if x > 0])/len(self.nb)
+    
+    def lossrate(self):
+        return sum([x for x in self.nb if x <= 0])/len(self.nb)
+    
+    def totalwin(self):
+        return sum([x for x in self.amount if x > 0])
+    
+    def totalloss(self):
+        return sum([x for x in self.amount if x <= 0])
+    
+    def avgwin(self):
+        return np.mean([x for x in self.amount if x > 0])
+    
+    def avgloss(self):
+        return np.mean([x for x in self.amount if x <= 0])
+    
+    def expectancy(self):
+        return self.winrate() * self.avgwin() + self.lossrate() * self.avgloss()
+    
+    def profitfactor(self):
+        return self.totalwin() / self.totalloss() * (-1)
+    
+    def minexp(self):
+        return min(self.exposure)
+    
+    def maxexp(self):
+        return max(self.exposure)
+
 
 class AMetric:
     
-    def __init__(self, tradesData):
-        self.tradesData = tradesData
-        self.nbTrades = 0
-        self.winTrades = 0
-        self.lossTrades = 0
-        
-        self.amoungWin = []
-        self.amoungLoss = []
+    def __init__(self):
+        self.nb_trades = 0
+        self.len_trade = 0
+        self.wto = WTO()
         
     
     @staticmethod
@@ -31,53 +70,65 @@ class AMetric:
     def calculate_skewness(r, n=8):
         return scipy.stats.skew(r) if len(r) > n else 0
     
-    @staticmethod
-    def expectancy(winRate, avgWin, avgLoss):
-        return winRate * avgWin + (1 - winRate) * avgLoss
-    
     staticmethod
     def sharpe_ratio(r):
         mean = AMetric.calculate_product(r)
         std = np.std(r)
         return mean / std
     
+    def exposition(self):
+        return
     
-    def update(self):
-        i = j = 0
-        while True:
-            j += 1
-            data = self.tradesData.iloc[i : j+1]
-            if self.tradesData.iloc[j]["status"] == "Close":
-                i = j+1
-                date = self.tradesData.index[j]
-                self.nbTrades += 1
-                pnl = self.tradesData.iloc[j]["pnl"]
-                
-                if pnl > 0:
-                    self.winTrades += 1
-                    self.amoungWin.append(pnl)
-                    self.amoungLoss.append(0)
-                    
-                else:
-                    self.lossTrades += 1
-                    self.amoungWin.append(0)
-                    self.amoungLoss.append(pnl)
-                    
-                winRate = self.winTrades / self.nbTrades
-                avgWin = np.mean(self.amoungWin)
-                avgLoss = np.mean(self.amoungLoss)
-                expectancy = AMetric.expectancy(winRate = winRate , avgWin = avgWin, avgLoss = avgLoss)
-                
-                profitFactor = np.sum(self.amoungWin) / np.sum(self.amoungLoss)*(-1)
-                
-                metric = {
-                    "date" : date,
-                    "nbTrades" : self.nbTrades,
-                    "winRate" : winRate,
-                    "expectancy" : expectancy,
-                    "profitFactor" : profitFactor,
-                }
-                yield metric
-            
+    def actuator(self, tradeData):
+        pnl = tradeData.iloc[-1]["pnl"]
+        status = tradeData.iloc[-1]["status"]
+        current_position = tradeData.iloc[-1]["position"]
         
+        if status == "Open":
+            self.nb_trades += 1
+            self.len_trade += 1
+            
+        elif status == "Close":
+            self.len_trade += 1
+            self.wto.exposure.append(self.len_trade)
+            self.len_trade = 0
+            if pnl > 0:
+                self.wto.nb.append(1)
+                self.wto.amount.append(pnl)
+            else:
+                self.wto.nb.append(-1)
+                self.wto.amount.append(pnl)
+        
+        if current_position != 0:
+            self.len_trade += 1
+            
+    
+    def calculate(self):
+        nbTrades = self.wto.nbtrades()
+        winRate = self.wto.winrate()
+        lossRate = self.wto.lossrate()
+        amountWin = self.wto.totalwin()
+        amountLoss = self.wto.totalloss()
+        expectancy = self.wto.expectancy()
+        profitFactor = self.wto.profitfactor()
+        minExposure = self.wto.minexp()
+        maxExposure = self.wto.maxexp()
+        
+        result = {
+            "nbTrades" : nbTrades,
+            "winRate": winRate,
+            "lossRate": lossRate,
+            "amountWin": amountWin,
+            "amountLoss": amountLoss,
+            "expectancy": expectancy,
+            "profitFactor": profitFactor,
+            "minExposure" : minExposure,
+            "maxExposure" : maxExposure
+        }
+        
+        return result
+    
+    def reset(self):
+        self.wto = WTO()
+
     

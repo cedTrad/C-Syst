@@ -1,7 +1,7 @@
 import numpy as np
 
 from .risk.cppi import CPPI
-from .risk.profit import ProfitManager
+from .profit_manager import ProfitManager
 
 RISK_SIGNAL = ["Close", "Resize"]
 
@@ -12,7 +12,7 @@ CUSHION_SEUIL = np.linspace(0, CUSHION, 5)
 class RiskManager:
     
     def __init__(self, capital):
-        self.init_capital = capital  # Capital a l'ouverture de la position
+        self.session_capital = capital  # Capital a l'ouverture de la session
         
         self.stop_loss_pct = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
         self.take_profit = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
@@ -22,30 +22,41 @@ class RiskManager:
         self.profitmanager = ProfitManager
     
     
-    def config(self, floor):
-        self.cppi.update_params(floor)
+    def get_metric(self):
+        return
     
     
     def get_current_capital(self, capital):
         self.current_capital = capital
-        self.cppi.update_capital(capital)
-    
-    
-    def set_stop_loss(self):
-        floor_value = self.cppi.get_floor_value()
-        stop_loss = floor_value
-    
-    
-    def update_risk(self):
-        cushion = self.cppi.update_cushion()
         
-        m = 3
-        risk_w = cushion * m
+         
+    def config_session_risk(self, params): # params = {"floor" : floor}
+        self.cppi.update_params(**params)
+        self.cppi.get_floor_value()
+    
+    
+    def update_session_capital(self, capital):
+        self.session_capital = capital
+    
+    
+    def update_risk(self, params = {"m" : 4}):
+        m = params["m"]
+        risk_w = self.cushion * m
         risk_w = np.minimum(risk_w, 1)
         risk_w = np.maximum(risk_w, 0)
-        risk_value_re = self.current_capital * risk_w
+        return risk_w
+    
+    
+    def actuator(self, capital):
+        self.get_current_capital(capital)
+        self.cppi.get_current_capital(capital)
+        self.cushion = self.cppi.update_cushion()
         
-        resize = True
-        return risk_value_re, resize
+        risk_w = self.update_risk()
+        
+    
+    
+    
+    
     
     

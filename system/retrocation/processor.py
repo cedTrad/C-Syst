@@ -1,5 +1,4 @@
 from typing import Any
-from .metrics import AMetric
 from .postprocessing import APostprocessing, PPostprocessing
 
 
@@ -14,25 +13,6 @@ class Processor:
         self.processAsset.transform(tradesData)
         self.processPort.transform(portfolioData)
         
-    
-    def gen_data(self, tradeDataAgent):
-        return AMetric(tradeDataAgent).update()
-    
-    
-
-    def update_metric(self, tradeDataAgent):
-        metrics = []
-        metric = self.gen_data(tradeDataAgent)
-        while True:
-            try:
-                metrics.append(
-                    next(metric)
-                    )
-                
-            except (StopIteration, IndexError):
-                break
-            
-        return metrics
     
     
     
