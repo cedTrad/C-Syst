@@ -47,7 +47,7 @@ class Politic:
         return amount
     
     
-    def perform(self, batchData, portfolio, current_asset_position):
+    def perform(self, batchData, portfolio, current_asset_position, session_state):
         capital, available_amount = portfolio["capital"], portfolio["available_value"]
         
         signalAction = {}
@@ -59,10 +59,14 @@ class Politic:
         sl = False
         tp = False
         
-        canOpenPosition, sideIn = Transition(signal, current_asset_position).get_in()
-        canClosePosition, sideOut = Transition(signal, current_asset_position).get_out()
-        skip, _ = Transition(signal, current_asset_position).skip()
+        canOpenPosition, sideIn = Transition(signal, current_asset_position, session_state).get_in()
+        canClosePosition, sideOut = Transition(signal, current_asset_position, session_state).get_out()
+        skip, _ = Transition(signal, current_asset_position, session_state).skip()
+        canCloseSession, sessionOut = Transition(signal, current_asset_position, session_state).get_out_session()
         resize = 0
+        
+        if canCloseSession:
+            signalAction.update({"state" : sessionOut + (sl, tp)})
         
         if canOpenPosition:
             signalAction.update({"state" : sideIn + (sl, tp)})

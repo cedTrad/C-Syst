@@ -47,9 +47,9 @@ class Agent:
         self.policy.update_risk_params(session_params=session_risk_params)
     
     
-    def act(self, state):
+    def act(self, state, session_state):
         signalAction, riskAction = self.policy.perform(batchData = self.batchData, portfolio = state["portfolio"],
-                                                       current_asset_position = self.asset.position)
+                                                       current_asset_position = self.asset.position, session_state = session_state)
         return signalAction, riskAction
     
     
@@ -64,10 +64,27 @@ class Agent:
         if signal["state"][1] == "LONG" or signal["state"][1] == "SHORT":
             self.following.execute(self.agentId)
             tradeData = self.following.tradeData
-            self.session.actuator(tradeData)
             self.post_event.add_session(event.date, self.agentId[0], self.session.n_session)
         else:
             self.post_event.add_session(event.date, self.agentId[0], "-")
+    
+    
+    
+    def execute2(self, state, paper_mode = True):
+        # before
+        event = self.get_event()
+        closeSession, n_session = self.session.actuator()
+        signalAction, riskAction = self.act(state, session_state=closeSession)
+        next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, n_session, paper_mode)
+        
+        # afer
+        if signalAction["state"][1] == "LONG" or signalAction["state"][1] == "SHORT":
+            self.following.execute(self.agentId)
+            tradedata = self.following.tradeData
+            self.session.metrics.actuator(tradedata)
+        
+        return event, next_state, reward, event, signalAction, riskAction
+    
     
     
     def run_episode(self):
@@ -75,7 +92,7 @@ class Agent:
         i = 0
         while True:
             try:
-                event, next_state, reward, event, signalAction, riskAction = self.execute(state)
+                event, next_state, reward, event, signalAction, riskAction = self.execute2(state)
                 state = next_state
                 self.follow(event=event, signal=signalAction)
                 i += 1

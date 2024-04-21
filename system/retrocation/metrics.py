@@ -86,6 +86,7 @@ class AMetric:
             
     
     def calculate(self):
+        nbTrades = self.wto.nbtrades()
         winRate = self.wto.winrate()
         lossRate = self.wto.lossrate()
         amountWin = self.wto.totalwin()
@@ -94,6 +95,7 @@ class AMetric:
         profitFactor = self.wto.profitfactor()
         
         result = {
+            "nbTrades" : nbTrades,
             "winRate": winRate,
             "lossRate": lossRate,
             "amountWin": amountWin,

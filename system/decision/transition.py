@@ -1,8 +1,9 @@
 
 class Transition:
     
-    def __init__(self, signal, current_asset_position : int, risk_signal = ""):
+    def __init__(self, signal, current_asset_position : int, session_state : bool):
         self.signal = signal
+        self.session_state = session_state
         self.current_asset_position = current_asset_position
         
     def get_in(self):
@@ -12,8 +13,8 @@ class Transition:
             return True, ("Open", "SHORT")
         else:
             return False, ("", "")
-
         
+    
     def get_out(self):
         if self.current_asset_position == 1 and self.signal is None:
             return True, ("Close", "LONG")
@@ -25,7 +26,15 @@ class Transition:
             return True, ("Close", "LONG")
         else:
             return False, ("", "")
-        
+    
+    
+    def get_out_session(self):
+        if self.current_asset_position == 1 and self.session_state is True:
+            return True, ("Close", "LONG")
+        elif self.current_asset_position == -1 and self.session_state is True:
+            return True, ("Close", "SHORT")
+        else:
+            return False, ("", "")
         
     def resize(self):
         return

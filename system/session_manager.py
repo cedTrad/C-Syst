@@ -28,8 +28,7 @@ class SessionManager:
         return
     
     
-    def actuator(self, tradedata):
-        self.metrics.actuator(tradeData=tradedata)
+    def actuator(self):
         if self.step == 0:
             self.report()
             m = self.get_session_metrics()
@@ -38,10 +37,13 @@ class SessionManager:
             self.update_step()
             self.metrics.reset()
             print(f"__ End Session {self.n_session} ____________")
+            return True, self.n_session
             
         if self.step == self.max_step :
             self.n_session += 1
             print(f"__ Start Session {self.n_session}____________")
-            #print(f"****** step : {self.step}")
+        
             
         self.step -= 1
+        return False, self.n_session
+    

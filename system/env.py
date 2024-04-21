@@ -68,13 +68,13 @@ class Env:
         fsm.perform(asset=asset, price=price, portfolio=self.portfolio)
         
     
-    def step(self, agentId, asset, event, signalAction, riskAction, paper_mode = True):
+    def step(self, agentId, asset, event, signalAction, riskAction, n_session, paper_mode = True):
         reward = 0
         self.execute(asset = asset, price = event.price, signalAction = signalAction,
                      riskAction = riskAction, paper_mode=paper_mode)
         self.portfolio.update(asset = asset)
         self.post_event.add_data(agentId = agentId, date = event.date, price = event.price,
-                              asset = asset, portfolio = self.portfolio)
+                              asset = asset, portfolio = self.portfolio, n_session = n_session)
         state = self.get_state()
         
         if "Close" in signalAction["state"]:
