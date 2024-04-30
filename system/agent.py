@@ -53,24 +53,7 @@ class Agent:
         return signalAction, riskAction
     
     
-    def execute(self, state, paper_mode=True):
-        event = self.get_event()
-        signalAction, riskAction = self.act(state)
-        next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, paper_mode)
-        return event, next_state, reward, event, signalAction, riskAction
-    
-    
-    def follow(self, event, signal):
-        if signal["state"][1] == "LONG" or signal["state"][1] == "SHORT":
-            self.following.execute(self.agentId)
-            tradeData = self.following.tradeData
-            self.post_event.add_session(event.date, self.agentId[0], self.session.n_session)
-        else:
-            self.post_event.add_session(event.date, self.agentId[0], "-")
-    
-    
-    
-    def execute2(self, state, paper_mode = True):
+    def execute(self, state, paper_mode = True):
         # before
         event = self.get_event()
         closeSession, n_session = self.session.actuator()
@@ -92,13 +75,12 @@ class Agent:
         i = 0
         while True:
             try:
-                event, next_state, reward, event, signalAction, riskAction = self.execute2(state)
+                event, next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
-                self.follow(event=event, signal=signalAction)
                 i += 1
             except StopIteration:
                 break
-            
+        print(f"N : {i}")
     
     def view_report(self):
         self.following.plot_equity()

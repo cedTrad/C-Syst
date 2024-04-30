@@ -34,7 +34,7 @@ class Benchmark:
         
         add_line(fig, data=self.portfolioDataAgent, feature="drawdown", name=f"drawdown", col=1, row=2)
         
-        fig.update_layout(height = 500 , width = 1000,
+        fig.update_layout(height = 300 , width = 1200,
                           legend = dict(orientation="h",
                                         yanchor="bottom", y=1,
                                         xanchor="right", x=0.5),
@@ -80,7 +80,7 @@ class Benchmark:
         self.candle(fig=fig, col=1, row=2, data=data, symbol=symbol)
         add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f"cum rets", col=1, row=3)
         
-        fig.update_layout(height = 800 , width = 1000,
+        fig.update_layout(height = 800 , width = 1200,
                           legend = dict(orientation="h",
                                         yanchor="bottom", y=1,
                                         xanchor="right", x=0.5),
