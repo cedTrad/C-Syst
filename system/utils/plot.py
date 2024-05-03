@@ -39,6 +39,8 @@ def plot_candle(fig, col, row, data, symbol):
         ),
         col = col, row = row
     )
+    y_range = [min(data["low"]) * 0.99, max(data["high"]) * 1.01]
+    fig = fig.update_yaxes(range=y_range, row=row, col=col)
     fig = fig.update_xaxes(rangeslider_visible=False)
 
 
@@ -119,6 +121,8 @@ def add_second_y(fig, col, row, data, name = 'position'):
         col = col, row = row,
         secondary_y=True
     )
+    range = [min(data[name])*0.98, max(data[name])*1.02]
+    fig.update_yaxes(range=range, row=row, col=col, secondary_y=True)
 
 
 # signal point

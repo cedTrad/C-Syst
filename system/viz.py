@@ -78,6 +78,7 @@ class Benchmark:
         #add_second_y(fig=fig, col=1, row=1, data=self.tradeDataAgent, name='pnl_pct')
         
         self.candle(fig=fig, col=1, row=2, data=data, symbol=symbol)
+        add_second_y(fig=fig, col=1, row=2, data=self.tradeDataAgent, name="session")
         add_line(fig, data=self.portfolioDataAgent, feature="cum_rets", name=f"cum rets", col=1, row=3)
         
         fig.update_layout(height = 800 , width = 1200,
