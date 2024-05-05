@@ -2,13 +2,14 @@
 
 class Asset:
     
-    def __init__(self, symbol):
+    def __init__(self, symbol, leverage = 1):
         self.symbol = symbol
         self.quantity = 0
         self.value = 0
         self.value_re = 0
         self.position = 0
         self.in_value = 0
+        self.leverage = leverage
         self.tp = 0
         self.sl = 0
         self.out_value = 0
@@ -17,13 +18,15 @@ class Asset:
         self.state = ()
         self.pnl = 0
         self.pnl_pct = 0
-            
-            
-    def get_pnl(self, price):
-        if self.state[1] == ("SHORT"):
-            return self.in_value - abs(self.quantity * price)
-        return abs(self.quantity * price) - self.in_value
     
+    
+    def set_leverage(self, lev):
+        self.leverage = lev
+    
+    def get_pnl(self, price):
+        if self.state[1] == "SHORT":
+            return self.in_value - abs(self.quantity * price)
+        return (abs(self.quantity * price) - self.in_value ) * self.leverage
     
     def get_value(self, price):
         return self.in_value + self.get_pnl(price)
@@ -31,31 +34,29 @@ class Asset:
     def update_state(self, state):
         self.state = state
     
-    def update(self, price, quantity = 0):
-        
-        if self.state[0] == ("Open"):
+    def update(self, price, quantity=0):
+        if self.state[0] == "Open":
             self.quantity += quantity
             self.in_value = abs(self.quantity * price)
             self.pnl = self.get_pnl(price)
             self.pnl_pct = self.pnl / self.in_value
             self.out_value = 0
         
-        elif self.state[0] == ("Close"):
+        elif self.state[0] == "Close":
             self.out_value = self.get_value(price)
             self.pnl = self.get_pnl(price)
             self.quantity += quantity
             self.pnl_pct = self.pnl / self.in_value
             self.in_value = 0
             
-        elif self.state[0] == ("-"):
+        elif self.state[0] == "-":
             self.out_value = 0
             self.pnl = self.get_pnl(price)
-            self.pnl_pct = self.pnl / self.in_value if self.in_value !=0 else 0
+            self.pnl_pct = self.pnl / self.in_value if self.in_value != 0 else 0
         
         self.value = self.get_value(price)
-        self.value_re = self.value if self.state[0] == ("Close") else self.value+self.out_value
-        
-
+        self.value_re = self.value if self.state[0] == "Close" else self.value + self.out_value
+    
 
 
 
@@ -118,3 +119,4 @@ class PFuture(Portfolio):
 class PDefi:
     def __init__(self):
         self.name = "metamask"
+        

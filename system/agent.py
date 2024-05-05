@@ -16,7 +16,7 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, capital, env):
+    def __init__(self, agentId, capital, leverage, env):
         self.agentId = agentId      # agent = (Id, symbol)
         self.symbol = agentId[1]
         
@@ -58,6 +58,9 @@ class Agent:
         event = self.get_event()
         closeSession, n_session = self.session.actuator()
         signalAction, riskAction = self.act(state, session_state=closeSession)
+        
+        if riskAction.get("leverage", None) is not None:
+            self.asset.set_leverage(riskAction["leverage"])
         next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, n_session, paper_mode)
         
         # afer
