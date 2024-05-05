@@ -43,8 +43,9 @@ class Politic:
         self.riskmanager.config_session_risk(self.session_params)
         self.riskmanager.actuator(current_capital)
         
+        leverage = 1
         amount = available_amount
-        return amount
+        return amount, leverage
     
     
     def perform(self, batchData, portfolio, current_asset_position, session_state):
@@ -70,8 +71,7 @@ class Politic:
         
         if canOpenPosition:
             signalAction.update({"state" : sideIn + (sl, tp)})
-            leverage = 1
-            amount = self.risk_policy(portfolio=portfolio, current_status="Open")
+            amount, leverage = self.risk_policy(portfolio=portfolio, current_status="Open")
             quantity = amount / price
             riskAction.update({"amount" : amount, "quantity" : quantity, "leverage" : leverage})
         

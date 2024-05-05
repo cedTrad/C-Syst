@@ -16,7 +16,7 @@ class GEnv:
         self.end = end
         
         self.post_event = PostEvent()
-        self.market = MarketEvent(start = start, end = end, interval = interval)
+        self.market = MarketEvent(size=50, start = start, end = end, interval = interval)
         
         self.metrics = {}
         
@@ -41,7 +41,7 @@ class Env:
         self.start = start
         self.end = end
         self.post_event = PostEvent()
-        self.market = MarketEvent(start = start, end = end, interval = interval)
+        self.market = MarketEvent(size=50, start = start, end = end, interval = interval)
     
     
     def initialize_portfolio(self, capital):

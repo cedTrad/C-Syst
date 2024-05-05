@@ -57,20 +57,19 @@ class Benchmark:
         
         entryPoints, exitPoints = self.get_points()
         
-        start = self.tradeDataAgent.index[0]
-        end = self.tradeDataAgent.index[-1]
-        
-        data = data.loc[start : end]
-        
         plot_candle(fig, data=data, col=col, row=row, symbol=f"OHLC : {symbol}")
         signal_point(fig, col=col, row=row, x=entryPoints.index, y=entryPoints.price, name="int", marker=(5, 10, 'blue'))
         signal_point(fig, col=col, row=row, x=exitPoints.index, y=exitPoints.price, name="out", marker=(6, 10, 'black'))
         color_trades(fig=fig, col=col, row=row, entry=entryPoints, exit=exitPoints, opacity=0.2)
         
         
-    def asset(self, data, agentId):
+    def asset(self, db, agentId):
         symbol = agentId[1]
         
+        start = self.tradeDataAgent.index[0]
+        end = self.tradeDataAgent.index[-1]
+        
+        data = db.get_data(symbol, start, end)
         fig = subplots(nb_rows=3, nb_cols=1, row_heights=[0.15, 0.7, 0.15])
         
         add_bar(fig=fig, col=1, row=1, data=self.tradeDataAgent, feature='pnl', name='pnl')

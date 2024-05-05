@@ -18,7 +18,7 @@ class connect_db:
         
         self.engine = sqlalchemy.create_engine('sqlite:///'+self.PATH)
     
-    def get_data(self, symbol , start = '2017', end = '2023'):
+    def get_data(self, symbol , start, end):
         data = pd.read_sql(symbol+"USDT", self.engine)
         data.set_index('time' , inplace=True)
         data['volume'] = pd.to_numeric(data['volume'])
