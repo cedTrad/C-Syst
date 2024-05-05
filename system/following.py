@@ -55,7 +55,7 @@ class Following:
     def plot_equity(self):
         tradeDataAgent = self.agent_data.trade_data
         portfolioDataAgent = self.agent_data.portfolio_data
-        data = self.db.get_data(self.agent_data.agent_id[1])
+        #data = self.db.get_data(self.agent_data.agent_id[1])
         
         agentId = self.agent_data.agent_id
         
@@ -64,7 +64,7 @@ class Following:
         fig_equity = benchmark.equity(agentId)
         fig_equity.show()
         
-        fig_asset = benchmark.asset(data, agentId)
+        fig_asset = benchmark.asset(self.db, agentId)
         fig_asset.show()
     
     

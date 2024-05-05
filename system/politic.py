@@ -43,7 +43,7 @@ class Politic:
         self.riskmanager.config_session_risk(self.session_params)
         self.riskmanager.actuator(current_capital)
         
-        leverage = 10
+        leverage = 1
         amount = available_amount
         return amount, leverage
     
