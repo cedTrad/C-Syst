@@ -21,6 +21,9 @@ class WTO:
     def lossrate(self):
         return sum([x for x in self.nb if x <= 0])/len(self.nb)
     
+    def total_amount(self):
+        return sum(self.amount)
+        
     def totalwin(self):
         return sum([x for x in self.amount if x > 0])
     
@@ -34,7 +37,7 @@ class WTO:
         return np.mean([x for x in self.amount if x <= 0])
     
     def expectancy(self):
-        return self.winrate() * self.avgwin() + self.lossrate() * self.avgloss()
+        return self.winrate() * self.avgwin() - self.lossrate() * self.avgloss()
     
     def profitfactor(self):
         return self.totalwin() / self.totalloss() * (-1)
@@ -80,7 +83,10 @@ class AMetric:
         return
     
     def actuator(self, tradeData):
+        self.date = tradeData.iloc[-1]["date"]
+        
         pnl = tradeData.iloc[-1]["pnl"]
+        self.cum_gp = tradeData.iloc[-1]["cum_gp"]
         status = tradeData.iloc[-1]["status"]
         current_position = tradeData.iloc[-1]["position"]
         
@@ -109,17 +115,21 @@ class AMetric:
         lossRate = self.wto.lossrate()
         amountWin = self.wto.totalwin()
         amountLoss = self.wto.totalloss()
+        totalAmount = self.wto.total_amount()
         expectancy = self.wto.expectancy()
         profitFactor = self.wto.profitfactor()
         minExposure = self.wto.minexp()
         maxExposure = self.wto.maxexp()
         
         result = {
+            "date" : self.date,
             "nbTrades" : nbTrades,
             "winRate": winRate,
             "lossRate": lossRate,
             "amountWin": amountWin,
             "amountLoss": amountLoss,
+            "totalAmount" : totalAmount,
+            "amount" : self.cum_gp,
             "expectancy": expectancy,
             "profitFactor": profitFactor,
             "minExposure" : minExposure,

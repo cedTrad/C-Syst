@@ -16,7 +16,7 @@ class Event:
 
 class Agent:
     
-    def __init__(self, agentId, capital, leverage, env):
+    def __init__(self, agentId, capital, env, session_step = 50):
         self.agentId = agentId      # agent = (Id, symbol)
         self.symbol = agentId[1]
         
@@ -33,7 +33,7 @@ class Agent:
         self.asset = Asset(self.symbol)
         self.policy = Politic(capital = capital)
         self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
-        self.session = SessionManager(self.following)
+        self.session = SessionManager(self.env, self.following, session_step)
     
     
     def get_event(self):
@@ -81,9 +81,11 @@ class Agent:
                 event, next_state, reward, event, signalAction, riskAction = self.execute(state)
                 state = next_state
                 i += 1
-            except StopIteration:
+                print(f" - {i}")
+            except StopIteration as e:
+                print("except : ",e)
+                print(f"N : {i}")
                 break
-        print(f"N : {i}")
     
     def view_report(self):
         self.following.plot_equity()

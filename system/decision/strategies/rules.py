@@ -20,6 +20,27 @@ class Momentum:
             return None
 
 
+
+class Momentum2:
+    
+    def __init__(self, data):
+        self.data = data.copy()
+        
+    def update_params(self, m):
+        self.m = m
+        
+    def preprocess(self):
+        self.data['mom'] = self.data["close"].pct_change().rolling(self.m).mean()
+    
+    def run(self, bar = -1):
+        self.preprocess()
+        
+        if (self.data["mom"].iloc[bar] > 0) and (self.data["mom"].iloc[bar-1] > 0):
+            return "LONG"
+        elif (self.data["mom"].iloc[bar] < 0) and (self.data["mom"].iloc[bar-1] < 0):
+            return "SHORT"
+        else:
+            return None
  
 
 class TMM:
