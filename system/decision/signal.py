@@ -18,6 +18,10 @@ class Signal:
             }
     
     
-    def processing(self):
-        return
+    def processing(self, batchData, policy_name, params):
+        self.sets(batchData)
+        rule = self.rules.get(policy_name, None)
+        rule.update_params(params)
+        signal = rule.run()
+        return signal
     
