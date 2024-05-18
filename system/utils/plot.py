@@ -121,9 +121,22 @@ def add_second_y(fig, col, row, data, name = 'position'):
         col = col, row = row,
         secondary_y=True
     )
+
+
+
+def add_second_y_candle(fig, col, row, data, name = 'position'):
+    fig.add_trace(
+        go.Scatter(
+            x = data.index,
+            y = data[name],
+            yaxis="y2",
+            name = name
+        ),
+        col = col, row = row,
+        secondary_y=True
+    )
     range = [min(data[name])*0.98, max(data[name])*1.02]
     fig.update_yaxes(range=range, row=row, col=col, secondary_y=True)
-
 
 # signal point
 def signal_point(fig, col, row, x, y, name, marker, size = 10):

@@ -68,6 +68,4 @@ class Following:
         fig_asset.show()
     
     
-    def get_report(self):
-        ""
-
+    
