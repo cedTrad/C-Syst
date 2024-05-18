@@ -135,3 +135,23 @@ class Agent:
         Optimise les paramètres de trading (méthode à implémenter).
         """
         pass
+    
+    def get_report(self):
+        tradeData = self.post_event.tradeData.copy()
+        portfolioData = self.post_event.portfolioData.copy()
+        sessionData = self.post_event.sessionData.copy()
+        init_capital = self.env.init_capital
+        agent_capital = init_capital + tradeData.iloc[-1]["cum_gp"] 
+        port_capital = portfolioData.iloc[-1]["capital"]
+        pnl = tradeData.iloc[-1]["cum_gp"]
+
+        print("Initial Capital:", init_capital)
+        print("Agent Capital:", agent_capital)
+        print("Portfolio Capital:", port_capital)
+        print("PnL:", pnl)
+        
+        min_expo = sessionData["minExposure"].min()
+        max_expo = sessionData["maxExposure"].max()
+        print(f"Min exposure : {min_expo}  Max exposure : {max_expo}")
+        
+        display(sessionData[["nbTrades", "winRate", "lossRate", "profitFactor"]])

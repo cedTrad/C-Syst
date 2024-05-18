@@ -22,6 +22,7 @@ class Politic:
         self.signal_params = {}
         self.session_params = {"floor": 0.2}
 
+
     def select_rule(self, policy_name: str):
         """
         Select the trading rule by its name.
@@ -30,18 +31,7 @@ class Politic:
         - policy_name (str): The name of the policy to be used.
         """
         self.policy_name = policy_name
-
-    def signal_policy(self, signal):
-        """
-        Process and return the signal as is. Can be overridden for more complex signal processing.
         
-        Parameters:
-        - signal: The signal to be processed.
-        
-        Returns:
-        - The processed signal.
-        """
-        return signal
 
     def update_signal_params(self, params: dict):
         """
@@ -54,7 +44,7 @@ class Politic:
 
     def update_risk_params(self, session_params: dict = {"floor": 0.2}):
         """
-        Update the parameters for the risk manager.
+        Update the parameters for the risk manager after end of each session.
         
         Parameters:
         - session_params (dict): The parameters for the session risk management.
@@ -82,7 +72,9 @@ class Politic:
         leverage = 1
         amount = available_amount
         return amount, leverage
-
+    
+    
+    
     def make_decision(self, batchData, portfolio, current_asset_position, session_state):
         """
         Perform the policy action based on the given data and portfolio state.
