@@ -6,7 +6,7 @@ from dataEngine.data import connect_db
 
 class MarketEvent:
     
-    def __init__(self, size = 45, start = "2024", end = "2024", interval = "1d"):
+    def __init__(self, size, start, end, interval):
         self.size = size
         self.start = start
         self.end = end
