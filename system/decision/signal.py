@@ -18,3 +18,6 @@ class Signal:
             }
     
     
+    def processing(self):
+        return
+    
