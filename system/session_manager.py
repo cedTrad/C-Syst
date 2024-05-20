@@ -10,9 +10,11 @@ class SessionManager:
         self.post_event = env.post_event
         self.max_step = max_step
         self.step = 50
-        self.n_session = 0
-        self.metrics = AMetric()
-    
+        self.session_id = 0
+        self.metrics = AMetric()        
+        self.rets_dist = {}
+
+
     def update_step(self):
         self.step = self.max_step
         
@@ -31,16 +33,20 @@ class SessionManager:
             
             print(session_metric)
             self.update_risk_session_params()
+            
+            self.rets_dist[self.session_id] = {"trade" : self.metrics.wto.rets, "market" : self.metrics.wto.mkt_rets}
+            
             self.update_step()
             self.metrics.reset()
-            print(f"__ End Session {self.n_session} ____________")
-            return True, self.n_session
+            print(f"__ End Session {self.session_id} ____________")
+            return True, self.session_id
             
         if self.step == self.max_step :
-            self.n_session += 1
-            print(f"__ Start Session {self.n_session}____________")
+            self.session_id += 1
+            
+            print(f"__ Start Session {self.session_id}____________")
         
             
         self.step -= 1
-        return False, self.n_session
+        return False, self.session_id
     

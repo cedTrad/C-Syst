@@ -182,4 +182,17 @@ def color_returns(fig, col, row, status, x , color, opacity):
 
 
 
+def session_dist(data : dict):
+    traces = []
+    for session, values in data.items():
+        for name, value in values.items():
+            trace_i = go.Box(y = value,
+                             name = f"{session}_{name}",
+                             boxmean = True
+                             )
+            traces.append(trace_i)
+    fig = go.Figure(traces)
+    return fig
+
+
 

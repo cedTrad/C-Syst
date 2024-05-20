@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 
-from .utils.plot import subplot, subplots, add_bar, add_line, plot_candle, signal_point, create_figure, color_returns, color_trades, add_second_y, add_second_y_candle
+from .utils.plot import go, session_dist, subplot, subplots, add_bar, add_line, plot_candle, signal_point, create_figure, color_returns, color_trades, add_second_y, add_second_y_candle
 
 import plotly.figure_factory as ff
 
@@ -87,5 +88,64 @@ class Benchmark:
                                         xanchor="right", x=0.6),
                           margin = {'t':0, 'b':0, 'l':10, 'r':0}
                           )
+        return fig
+    
+
+
+class Session:
+    
+    def pnl_dist(self, trd_rets):
+        traces = []
+        for name, value in trd_rets.items():
+            trace_i = go.Box(y=value, name=name, boxmean=True)
+            traces.append(trace_i)
+            
+        fig = go.Figure(traces)
+        fig.update_layout(height = 300 , width = 1200,
+                          title = "Market",
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          xaxis_title="Session",
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0},
+                          showlegend=False, boxmode='group'
+                          )
+        fig.update_traces(boxpoints='all', jitter=0)
+        return fig
         
+
+    
+    def compare_dist(self, data:dict):
+        sessions = []
+        values = []
+        categories = []
+        
+        for session, s_data in data.items():
+            for name, value in s_data.items():
+                sessions.extend([f'Session {session}'] * len(value))
+                values.extend(value)
+                categories.extend([name.capitalize()] * len(value))
+        
+        df = pd.DataFrame({"Session":sessions, "Value":values, "Category":categories})
+        
+        fig = go.Figure()
+        for category in df["Category"].unique():
+            fig.add_trace(
+                go.Box(
+                    y = df[df["Category"] == category]["Value"],
+                    x  = df[df["Category"] == category]["Session"],
+                    name=category,
+                    boxpoints='all',
+                    jitter=0.5, pointpos=-1.8
+                )
+            )
+        fig.update_layout(height = 400 , width = 1200,
+                          legend = dict(orientation="h",
+                                        yanchor="bottom", y=1,
+                                        xanchor="right", x=0.5),
+                          xaxis_title="Session",
+                          margin = {'t':0, 'b':0, 'l':10, 'r':0},
+                          template='plotly_white',
+                          showlegend=True, boxmode='group'
+                          )
         return fig

@@ -123,6 +123,9 @@ class Agent:
         Affiche le rapport de performance.
         """
         self.following.plot_equity()
+        
+        # viz sessions
+        self.following.plot_session(self.session.rets_dist)
 
     def learn(self):
         """
@@ -130,11 +133,6 @@ class Agent:
         """
         pass
 
-    def optimize(self):
-        """
-        Optimise les paramètres de trading (méthode à implémenter).
-        """
-        pass
     
     def get_report(self):
         tradeData = self.post_event.tradeData.copy()
@@ -149,9 +147,10 @@ class Agent:
         print("Agent Capital:", agent_capital)
         print("Portfolio Capital:", port_capital)
         print("PnL:", pnl)
+        print("Return : ",((agent_capital/init_capital)-1)*100,"%")
         
         min_expo = sessionData["minExposure"].min()
         max_expo = sessionData["maxExposure"].max()
         print(f"Min exposure : {min_expo}  Max exposure : {max_expo}")
         
-        display(sessionData[["nbTrades", "winRate", "lossRate", "profitFactor"]])
+        display(sessionData[["date", "nbTrades", "winRate", "lossRate", "profitFactor"]])
