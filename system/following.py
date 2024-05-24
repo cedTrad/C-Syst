@@ -1,6 +1,6 @@
 from .report import Report
 from .retrocation.processor import Processor
-from .viz import Benchmark
+from .viz import Benchmark, Session
 
 
 
@@ -66,6 +66,9 @@ class Following:
         
         fig_asset = benchmark.asset(self.db, agentId)
         fig_asset.show()
+
     
-    
-    
+    def plot_session(self, rets:dict):
+        session_viz = Session()
+        fig = session_viz.compare_dist(rets)
+        fig.show()

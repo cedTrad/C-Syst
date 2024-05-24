@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import ast
 import scipy.stats
 
 from dataclasses import dataclass, field
@@ -10,6 +11,8 @@ from typing import List
 class WTO:
     nb: List[int] = field(default_factory=list)
     amount: List[float] = field(default_factory=list)
+    rets : List[float] = field(default_factory=list)
+    mkt_rets : List[float] = field(default_factory=list)
     exposure : List[float] = field(default_factory=list)
     
     def nbtrades(self):
@@ -35,6 +38,12 @@ class WTO:
     
     def avgloss(self):
         return np.mean([x for x in self.amount if x <= 0])
+    
+    def distribution(self):
+        r = 4
+        avg, std = np.mean(self.rets), np.std(self.rets)
+        q1, median, q3 = np.percentile(self.rets, 0.25), np.percentile(self.rets, 0.5), np.percentile(self.rets, 0.75)
+        return [round(x*100, r) for x in [q1, avg, median, q3]]
     
     def expectancy(self):
         return self.winrate() * self.avgwin() - self.lossrate() * self.avgloss()
@@ -86,9 +95,17 @@ class AMetric:
         self.date = tradeData.iloc[-1]["date"]
         
         pnl = tradeData.iloc[-1]["pnl"]
+        
+        pnl_pct = tradeData.iloc[-1]["pnl_pct"]
+        mkt_pct = tradeData.iloc[-1]["ret_price"]
+        
         self.cum_gp = tradeData.iloc[-1]["cum_gp"]
         status = tradeData.iloc[-1]["status"]
         current_position = tradeData.iloc[-1]["position"]
+        
+        position = tradeData["state"].apply(lambda x : ast.literal_eval(x)[1]).iloc[-1]
+        if position in ["LONG", "SHORT"]:
+            self.wto.mkt_rets.append(mkt_pct)
         
         if status == "Open":
             self.nb_trades += 1
@@ -98,15 +115,11 @@ class AMetric:
             self.len_trade += 1
             self.wto.exposure.append(self.len_trade)
             self.len_trade = 0
-            if pnl > 0:
-                self.wto.nb.append(1)
-                self.wto.amount.append(pnl)
-            else:
-                self.wto.nb.append(-1)
-                self.wto.amount.append(pnl)
-        
-        if current_position != 0:
-            self.len_trade += 1
+            
+            self.wto.nb.append(1) if pnl > 0 else self.wto.nb.append(-1)
+            
+            self.wto.amount.append(pnl)
+            self.wto.rets.append(pnl_pct)
             
     
     def calculate(self):
@@ -120,7 +133,7 @@ class AMetric:
         profitFactor = self.wto.profitfactor()
         minExposure = self.wto.minexp()
         maxExposure = self.wto.maxexp()
-        
+        distribution = self.wto.distribution()
         result = {
             "date" : self.date,
             "nbTrades" : nbTrades,
@@ -133,7 +146,8 @@ class AMetric:
             "expectancy": expectancy,
             "profitFactor": profitFactor,
             "minExposure" : minExposure,
-            "maxExposure" : maxExposure
+            "maxExposure" : maxExposure,
+            "q1 avg median q3 %" : distribution
         }
         
         return result
