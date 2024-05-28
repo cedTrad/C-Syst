@@ -1,93 +1,79 @@
+import pandas as pd
+import dash_bootstrap_components as dbc
 from dash import dcc, html
 
 def create_layout():
-    return html.Div([
-        html.H1("Application de Trading de Crypto Inspirée de Binance Futures"),
-        html.Label("Sélectionner l'intervalle de temps :"),
-        dcc.Dropdown(
-            id='time-interval',
-            options=[
-                {'label': '1 Minute', 'value': '1m'},
-                {'label': '5 Minutes', 'value': '5m'},
-                {'label': '15 Minutes', 'value': '15m'},
-                {'label': '1 Hour', 'value': '1h'},
-                {'label': '1 Day', 'value': '1d'},
-            ],
-            value='1m',
-            placeholder="Intervalle de Temps",
-            style={'width': '50%'}
-        ),
-        html.Label("Sélectionner la fréquence de mise à jour :"),
-        dcc.Dropdown(
-            id='update-frequency',
-            options=[
-                {'label': '30 secondes', 'value': 30*1000},
-                {'label': '1 minute', 'value': 60*1000},
-                {'label': '5 minutes', 'value': 5*60*1000},
-            ],
-            value=60*1000,
-            placeholder="Fréquence de mise à jour",
-            style={'width': '50%'}
-        ),
-        html.Label("Sélectionner le type de graphique :"),
-        dcc.Dropdown(
-            id='chart-type',
-            options=[
-                {'label': 'Chandelier', 'value': 'candlestick'},
-                {'label': 'Ligne', 'value': 'line'},
-            ],
-            value='candlestick',
-            placeholder="Type de graphique",
-            style={'width': '50%'}
-        ),
-        html.Label("Sélectionner la période historique :"),
-        dcc.Dropdown(
-            id='historical-period',
-            options=[
-                {'label': '1 Jour', 'value': '1d'},
-                {'label': '1 Semaine', 'value': '7d'},
-                {'label': '1 Mois', 'value': '1m'},
-            ],
-            value='7d',
-            placeholder="Période Historique",
-            style={'width': '50%'}
-        ),
-        html.Label("Ajouter des indicateurs techniques :"),
-        dcc.Checklist(
-            id='technical-indicators',
-            options=[
-                {'label': 'Moyenne Mobile Simple (SMA)', 'value': 'sma'},
-                {'label': 'Moyenne Mobile Exponentielle (EMA)', 'value': 'ema'},
-            ],
-            value=['sma']
-        ),
-        dcc.Graph(id='live-graph', animate=True),
-        dcc.Interval(
-            id='graph-update',
-            interval=60*1000,  # 1 minute par défaut
-            n_intervals=0
-        ),
-        html.Div([
-            html.Label("Symbole de la crypto :"),
-            dcc.Input(id='crypto-symbol', value='BTCUSDT', type='text', style={'width': '20%'}),
-            html.Label("Montant de l'ordre :"),
-            dcc.Input(id='order-amount', value='1', type='number', style={'width': '20%'}),
-            html.Label("Prix limite :"),
-            dcc.Input(id='limit-price', value='0', type='number', placeholder="Prix Limite", style={'width': '20%'}),
-            html.Label("Levier :"),
-            dcc.Input(id='leverage', value='1', type='number', placeholder="Levier", style={'width': '20%'}),
-            html.Label("Stop Loss :"),
-            dcc.Input(id='stop-loss', value='0', type='number', placeholder="Stop Loss", style={'width': '20%'}),
-            html.Label("Take Profit :"),
-            dcc.Input(id='take-profit', value='0', type='number', placeholder="Take Profit", style={'width': '20%'}),
-            html.Button('Acheter', id='buy-button', n_clicks=0, style={'backgroundColor': 'green', 'color': 'white'}),
-            html.Button('Vendre', id='sell-button', n_clicks=0, style={'backgroundColor': 'red', 'color': 'white'}),
-        ], style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'flex-start', 'width': '100%'}),
-        html.Div(id='order-status'),
-        html.H2("Positions Ouvertes"),
-        html.Div(id='open-positions'),
-        html.H2("Historique des Transactions"),
-        html.Div(id='transaction-history'),
-        html.H2("Profit et Perte"),
-        html.Div(id='pnl')
-    ])
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col(html.H1("Binance Trading Dashboard", className="text-center mb-4"), width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Positions Actuelles"),
+                dcc.Interval(id='interval-component', interval=10*1000, n_intervals=0),
+                html.Div(id='positions-div')
+            ], width=6),
+            dbc.Col([
+                html.H3("Statistiques du PnL"),
+                html.Div(id='pnl-div')
+            ], width=6)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Historique des Positions"),
+                dcc.DatePickerRange(
+                    id='date-picker-range',
+                    start_date=pd.to_datetime('today') - pd.DateOffset(days=30),
+                    end_date=pd.to_datetime('today')
+                ),
+                html.Button(id='submit-button', n_clicks=0, children='Afficher l\'historique'),
+                html.Div(id='history-div')
+            ], width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Graphiques"),
+                dcc.Graph(id='history-graph')
+            ], width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Actifs Détenus"),
+                dcc.Interval(id='interval-positions-component', interval=10*1000, n_intervals=0),
+                html.Div(id='assets-div')
+            ], width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Placer un Ordre"),
+                html.Div([
+                    dbc.Label("Symbole"),
+                    dcc.Input(id='order-symbol', type='text', value='BTCUSDT'),
+                    dbc.Label("Côté"),
+                    dcc.Dropdown(
+                        id='order-side',
+                        options=[
+                            {'label': 'Achat', 'value': 'BUY'},
+                            {'label': 'Vente', 'value': 'SELL'}
+                        ],
+                        value='BUY'
+                    ),
+                    dbc.Label("Type d'ordre"),
+                    dcc.Dropdown(
+                        id='order-type',
+                        options=[
+                            {'label': 'Market', 'value': 'MARKET'},
+                            {'label': 'Limit', 'value': 'LIMIT'}
+                        ],
+                        value='MARKET'
+                    ),
+                    dbc.Label("Quantité"),
+                    dcc.Input(id='order-quantity', type='number', value=0.001),
+                    dbc.Label("Prix (pour les ordres limit)"),
+                    dcc.Input(id='order-price', type='number'),
+                    html.Button(id='submit-order', n_clicks=0, children='Placer l\'ordre'),
+                    html.Div(id='order-result')
+                ])
+            ], width=12)
+        ])
+    ], fluid=True)

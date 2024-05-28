@@ -1,166 +1,104 @@
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
-import plotly.graph_objs as go
+import dash_bootstrap_components as dbc
 import pandas as pd
-from app.data_fetcher import fetch_crypto_data, fetch_historical_data, place_order, get_open_positions, get_order_history, get_pnl
-from app.database import add_order, get_orders
-
-def calculate_sma(data, window):
-    return data.rolling(window=window).mean()
-
-def calculate_ema(data, window):
-    return data.ewm(span=window, adjust=False).mean()
+import plotly.express as px
+from app.binance_api import get_positions, get_history, get_pnl, place_order
 
 def register_callbacks(app):
+    # Callbacks pour mettre à jour les données en temps réel
     @app.callback(
-        Output('graph-update', 'interval'),
-        Input('update-frequency', 'value')
+        Output('positions-div', 'children'),
+        [Input('interval-component', 'n_intervals')]
     )
-    def update_interval(frequency):
-        return frequency
+    def update_positions(n):
+        positions_data = get_positions()
+        if 'balances' in positions_data:
+            balances = positions_data['balances']
+            df_positions = pd.DataFrame(balances)
+            df_positions = df_positions[df_positions['free'].astype(float) > 0]
+            return dbc.Table.from_dataframe(df_positions, striped=True, bordered=True, hover=True)
+        return "Erreur lors de la récupération des données des positions."
 
     @app.callback(
-        Output('live-graph', 'figure'),
-        [Input('graph-update', 'n_intervals'),
-         Input('time-interval', 'value'),
-         Input('chart-type', 'value'),
-         Input('historical-period', 'value'),
-         Input('technical-indicators', 'value')],
-        State('crypto-symbol', 'value')
+        Output('pnl-div', 'children'),
+        [Input('interval-component', 'n_intervals')]
     )
-    def update_graph(n, interval, chart_type, period, indicators, symbol):
-        data = fetch_historical_data(symbol, interval, period)
-        if chart_type == 'candlestick':
-            fig = go.Candlestick(
-                x=data['timestamp'],
-                open=data['open'],
-                high=data['high'],
-                low=data['low'],
-                close=data['close'],
-                increasing_line_color='green',
-                decreasing_line_color='red'
-            )
-        else:
-            fig = go.Scatter(
-                x=data['timestamp'],
-                y=data['close'],
-                mode='lines',
-                line=dict(color='blue')
-            )
-
-        figure_data = [fig]
-
-        # Ajout des indicateurs techniques
-        if 'sma' in indicators:
-            sma = calculate_sma(data['close'], window=20)
-            figure_data.append(go.Scatter(
-                x=data['timestamp'],
-                y=sma,
-                mode='lines',
-                line=dict(color='orange', dash='dash'),
-                name='SMA 20'
-            ))
-        if 'ema' in indicators:
-            ema = calculate_ema(data['close'], window=20)
-            figure_data.append(go.Scatter(
-                x=data['timestamp'],
-                y=ema,
-                mode='lines',
-                line=dict(color='purple', dash='dash'),
-                name='EMA 20'
-            ))
-
-        # Points d'entrée, sortie, stop loss et take profit
-        order_markers = []
-        orders = get_orders()
-        for order in orders:
-            if order.symbol == symbol:
-                order_markers.append(go.Scatter(
-                    x=[order.timestamp],
-                    y=[order.price],
-                    mode='markers+text',
-                    marker=dict(color='blue' if order.type == 'buy' else 'orange', size=12),
-                    text=order.type.capitalize(),
-                    textposition='top center'
-                ))
-                if order.stop_loss > 0:
-                    order_markers.append(go.Scatter(
-                        x=[order.timestamp],
-                        y=[order.stop_loss],
-                        mode='markers+text',
-                        marker=dict(color='red', size=10, symbol='x'),
-                        text='Stop Loss',
-                        textposition='bottom center'
-                    ))
-                if order.take_profit > 0:
-                    order_markers.append(go.Scatter(
-                        x=[order.timestamp],
-                        y=[order.take_profit],
-                        mode='markers+text',
-                        marker=dict(color='green', size=10, symbol='triangle-up'),
-                        text='Take Profit',
-                        textposition='bottom center'
-                    ))
-
-        figure = {
-            'data': figure_data + order_markers,
-            'layout': go.Layout(
-                xaxis={'title': 'Time'},
-                yaxis={'title': 'Price'},
-                title=f'Price of {symbol} over the last {period}',
-                plot_bgcolor='black',
-                paper_bgcolor='black',
-                font={'color': 'white'}
-            )
-        }
-        return figure
-
-    @app.callback(Output('order-status', 'children'),
-                  [Input('buy-button', 'n_clicks'),
-                   Input('sell-button', 'n_clicks')],
-                  [State('crypto-symbol', 'value'),
-                   State('order-amount', 'value'),
-                   State('limit-price', 'value'),
-                   State('leverage', 'value'),
-                   State('stop-loss', 'value'),
-                   State('take-profit', 'value')])
-    def handle_orders(buy_clicks, sell_clicks, symbol, amount, limit_price, leverage, stop_loss, take_profit):
-        ctx = dash.callback_context
-        if not ctx.triggered:
-            return ''
-        else:
-            button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-            order_type = 'LIMIT' if limit_price > 0 else 'MARKET'
-            side = 'BUY' if button_id == 'buy-button' else 'SELL'
-            order = place_order(symbol, amount, limit_price, side, order_type, leverage)
-            return f'Ordre {side} de {amount} {symbol} au prix limite de {limit_price} avec un levier de {leverage}, stop loss à {stop_loss} et take profit à {take_profit} passé avec succès.'
-
-    @app.callback(Output('open-positions', 'children'),
-                  Input('graph-update', 'n_intervals'))
-    def update_open_positions(n):
-        positions = get_open_positions()
-        return html.Table([
-            html.Thead(html.Tr([html.Th("Symbol"), html.Th("Position Amount"), html.Th("Entry Price"), html.Th("PNL")])),
-            html.Tbody([
-                html.Tr([html.Td(pos['symbol']), html.Td(pos['positionAmt']), html.Td(pos['entryPrice']), html.Td(pos['unrealizedProfit'])])
-                for pos in positions
-            ])
-        ])
-
-    @app.callback(Output('transaction-history', 'children'),
-                  [Input('graph-update', 'n_intervals')],
-                  State('crypto-symbol', 'value'))
-    def update_transaction_history(n, symbol):
-        orders = get_order_history(symbol)
-        return html.Table([
-            html.Thead(html.Tr([html.Th("Order ID"), html.Th("Timestamp"), html.Th("Symbol"), html.Th("Type"), html.Th("Price"), html.Th("Quantity"), html.Th("Status")])),
-            html.Tbody([
-                html.Tr([html.Td(order['orderId']), html.Td(pd.to_datetime(order['time'], unit='ms')), html.Td(order['symbol']), html.Td(order['side']), html.Td(order['price']), html.Td(order['origQty']), html.Td(order['status'])])
-                for order in orders
-            ])
-        ])
-
-    @app.callback(Output('pnl', 'children'),
-                  Input('graph-update', 'n_intervals'))
     def update_pnl(n):
-        pnl = get_pnl()
-        return f'Total PnL: {pnl} USDT'
+        pnl_data = get_pnl()
+        if 'balances' in pnl_data:
+            balances = pnl_data['balances']
+            df_pnl = pd.DataFrame(balances)
+            df_pnl = df_pnl[df_pnl['free'].astype(float) > 0]
+            df_pnl['PnL'] = df_pnl['free'].astype(float) - df_pnl['locked'].astype(float)
+            return dbc.Table.from_dataframe(df_pnl, striped=True, bordered=True, hover=True)
+        return "Erreur lors de la récupération des données du PnL."
+
+    # Callback pour afficher l'historique et le graphique
+    @app.callback(
+        [Output('history-div', 'children'), Output('history-graph', 'figure')],
+        [Input('submit-button', 'n_clicks')],
+        [State('date-picker-range', 'start_date'), State('date-picker-range', 'end_date')]
+    )
+    def update_history(n_clicks, start_date, end_date):
+        if n_clicks > 0:
+            start_timestamp = int(pd.Timestamp(start_date).timestamp() * 1000)
+            end_timestamp = int(pd.Timestamp(end_date).timestamp() * 1000)
+            history_data = get_history(None, start_timestamp, end_timestamp)
+            if history_data:
+                df_history = pd.DataFrame(history_data)
+                table = dbc.Table.from_dataframe(df_history, striped=True, bordered=True, hover=True)
+
+                fig = px.line(df_history, x='time', y='price', color='symbol', title='Prix au Fil du Temps')
+                return table, fig
+        return "Sélectionnez une période et cliquez sur 'Afficher l'historique'", {}
+
+    # Callback pour afficher les actifs détenus
+    @app.callback(
+        Output('assets-div', 'children'),
+        [Input('interval-positions-component', 'n_intervals')]
+    )
+    def update_assets(n):
+        positions_data = get_positions()
+        if 'balances' in positions_data:
+            balances = positions_data['balances']
+            df_positions = pd.DataFrame(balances)
+            df_positions = df_positions[df_positions['free'].astype(float) > 0]
+
+            # Limiter à 3 actifs maximum
+            df_positions = df_positions.head(3)
+
+            # Obtenir les historiques des prix pour ces actifs
+            figures = []
+            for asset in df_positions['asset']:
+                start_timestamp = int(pd.Timestamp('today') - pd.DateOffset(days=30).timestamp() * 1000)
+                end_timestamp = int(pd.Timestamp('today').timestamp() * 1000)
+                history_data = get_history(asset, start_timestamp, end_timestamp)
+                if history_data:
+                    df_history = pd.DataFrame(history_data)
+                    fig = px.line(df_history, x='time', y='price', title=f'Tendances de {asset}')
+                    figures.append(dcc.Graph(figure=fig))
+
+            return figures
+        return "Erreur lors de la récupération des données des actifs."
+
+    # Callback pour placer un ordre
+    @app.callback(
+        [Output('order-result', 'children'), Output('order-result', 'className')],
+        [Input('submit-order', 'n_clicks')],
+        [State('order-symbol', 'value'),
+         State('order-side', 'value'),
+         State('order-type', 'value'),
+         State('order-quantity', 'value'),
+         State('order-price', 'value')]
+    )
+    def place_order_callback(n_clicks, symbol, side, order_type, quantity, price):
+        if n_clicks > 0:
+            if not symbol or not side or not order_type or not quantity or (order_type == 'LIMIT' and not price):
+                return "Tous les champs sont obligatoires pour les ordres limit", "alert alert-danger"
+            result = place_order(symbol, side, order_type, quantity, price)
+            if 'orderId' in result:
+                return f"Ordre placé avec succès : {result}", "alert alert-success"
+            else:
+                return f"Erreur lors du placement de l'ordre : {result}", "alert alert-danger"
+        return "", ""
