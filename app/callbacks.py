@@ -37,7 +37,7 @@ def register_callbacks(app):
 
     # Callback pour afficher l'historique et le graphique
     @app.callback(
-        [Output('history-div', 'children'), Output('history-graph', 'figure')],
+        [Output('history-div', 'children'), Output('history-graph', 'figure'), Output('detailed-graph', 'figure')],
         [Input('submit-button', 'n_clicks')],
         [State('date-picker-range', 'start_date'), State('date-picker-range', 'end_date')]
     )
@@ -51,8 +51,10 @@ def register_callbacks(app):
                 table = dbc.Table.from_dataframe(df_history, striped=True, bordered=True, hover=True)
 
                 fig = px.line(df_history, x='time', y='price', color='symbol', title='Prix au Fil du Temps')
-                return table, fig
-        return "Sélectionnez une période et cliquez sur 'Afficher l'historique'", {}
+                detailed_fig = px.scatter(df_history, x='time', y='price', color='symbol', size='quantity', title='Transactions Individuelles')
+
+                return table, fig, detailed_fig
+        return "Sélectionnez une période et cliquez sur 'Afficher l'historique'", {}, {}
 
     # Callback pour afficher les actifs détenus
     @app.callback(

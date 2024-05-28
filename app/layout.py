@@ -1,6 +1,6 @@
+import pandas as pd
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-import pandas as pd
 
 def create_layout():
     return dbc.Container([
@@ -46,7 +46,8 @@ def create_layout():
                     html.I(className="fas fa-chart-bar me-2"),
                     "Graphiques"
                 ], className="text-light"),
-                dcc.Graph(id='history-graph', config={'displayModeBar': False})
+                dcc.Graph(id='history-graph', config={'displayModeBar': False}),
+                dcc.Graph(id='detailed-graph', config={'displayModeBar': False})
             ], width=12)
         ], className="mt-4"),
         dbc.Row([
