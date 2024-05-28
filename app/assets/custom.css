@@ -1,0 +1,28 @@
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .mt-4 {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  .text-light {
+    animation: fadeIn 1s ease-in;
+  }
+  
