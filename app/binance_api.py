@@ -59,6 +59,15 @@ def get_pnl():
     }
     return binance_request('/api/v3/account', params)
 
+def get_price(symbol):
+    timestamp = int(time.time() * 1000)
+    params = {
+        'symbol': symbol,
+        'timestamp': timestamp,
+        'recvWindow': 5000
+    }
+    return binance_request('/api/v3/ticker/price', params)
+
 def place_order(symbol, side, order_type, quantity, price=None):
     timestamp = int(time.time() * 1000)
     params = {

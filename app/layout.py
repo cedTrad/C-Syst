@@ -71,9 +71,16 @@ def create_layout():
                     dcc.Input(id='order-quantity', type='number', value=0.001),
                     dbc.Label("Prix (pour les ordres limit)"),
                     dcc.Input(id='order-price', type='number'),
+                    html.Div(id='order-preview'),
                     html.Button(id='submit-order', n_clicks=0, children='Placer l\'ordre'),
                     html.Div(id='order-result')
                 ])
+            ], width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                html.H3("Événements"),
+                html.Div(id='events-div')
             ], width=12)
         ])
     ], fluid=True)
