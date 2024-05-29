@@ -73,7 +73,7 @@ def create_layout():
                     dbc.Button("Long", id='order-long', color="success", className="me-2"),
                     dbc.Button("Short", id='order-short', color="danger"),
                     dbc.Label("Type d'ordre", className="text-light"),
-                    dcc.Dropdown(
+                    dcc.RadioItems(
                         id='order-type',
                         options=[
                             {'label': 'Market', 'value': 'MARKET'},
@@ -87,7 +87,8 @@ def create_layout():
                     dbc.Label("Prix (pour les ordres limit)", className="text-light"),
                     dcc.Input(id='order-price', type='number', className="bg-dark text-light"),
                     dbc.Label("Levier", className="text-light"),
-                    dcc.Input(id='order-leverage', type='number', value=1, className="bg-dark text-light"),
+                    #dcc.Input(id='order-leverage', type='number', value=1, className="bg-dark text-light"),
+                    dcc.Slider(1, 20, 1, id='order-leverage', className='bg-dark text-light'),
                     html.Div(id='order-preview', className="text-light mt-2"),
                     html.Button(id='submit-order', n_clicks=0, children='Placer l\'ordre', className="btn btn-primary mt-2"),
                     html.Div(id='order-result', className="text-light mt-2")
@@ -104,3 +105,6 @@ def create_layout():
             ], width=12)
         ], className="mt-4")
     ], fluid=True)
+
+
+

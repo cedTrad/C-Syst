@@ -104,13 +104,12 @@ def register_callbacks(app):
         [Output('order-result', 'children'), Output('order-result', 'className')],
         [Input('submit-order', 'n_clicks')],
         [State('order-symbol', 'value'),
-         State('order-side', 'value'),
          State('order-type', 'value'),
          State('order-quantity', 'value'),
          State('order-leverage', 'value'),
          State('order-price', 'value')]
     )
-    def place_order_callback(n_clicks, symbol, side, order_type, quantity, leverage, price):
+    def place_order_callback(n_clicks, symbol, order_type, quantity, leverage, price):
         if n_clicks > 0:
             if not symbol or not side or not order_type or not quantity or not leverage or (order_type == 'LIMIT' and not price):
                 return "Tous les champs sont obligatoires pour les ordres limit", "alert alert-danger"
@@ -138,6 +137,7 @@ def register_callbacks(app):
         return dbc.Table.from_dataframe(df_events, striped=True, bordered=True, hover=True)
 
     # Callback pour afficher l'évolution du capital
+    """
     @app.callback(
         Output('capital-graph', 'figure'),
         [Input('interval-component', 'n_intervals')]
@@ -151,3 +151,4 @@ def register_callbacks(app):
             fig = px.line(df_pnl, x='asset', y='walletBalance', title='Évolution du Capital')
             return fig
         return {}
+    """
