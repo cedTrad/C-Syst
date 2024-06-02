@@ -29,3 +29,33 @@
 .text {
   color: white;
 }
+
+.text-white {
+  color: white !important;
+}
+
+.bg-dark {
+  background-color: #343a40 !important;
+}
+
+
+/* custom.css */
+.bg-dark .text-white {
+  color: blue !important;
+}
+
+.dcc-dropdown, .dcc-radio-items, .dcc-input {
+  color: blue !important;
+}
+
+.dcc-dropdown .Select--single > .Select-control .Select-value {
+  color: blue !important;
+}
+
+.dcc-radio-items .dash-radio-items-container input + label {
+  color: blue !important;
+}
+
+.dcc-input input {
+  color: blue !important;
+}
