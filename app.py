@@ -1,25 +1,18 @@
 import dash
 import dash_bootstrap_components as dbc
 from app.layout import create_layout
-from app.callbacks import register_callbacks
-from app.db_utils import init_db
+from app.callbacks import CallBack
+import logging
 
-# Initialiser la base de données
-init_db()
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='trading_app.log')
 
-# Initialiser l'application Dash avec le thème CYBORG et Font Awesome
-external_stylesheets = [dbc.themes.CYBORG, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+cb = CallBack()
 
-# Charger les fichiers CSS personnalisés
-app.css.append_css({"external_url": "/assets/custom.css"})
-
-# Définir la mise en page de l'application
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"], suppress_callback_exceptions=True)
 app.layout = create_layout()
 
-# Enregistrer les callbacks
-register_callbacks(app)
+cb.register_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-

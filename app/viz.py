@@ -1,11 +1,6 @@
-from datetime import datetime, timedelta
-import pandas as pd
 import plotly.graph_objects as go
+import pandas as pd
 
-SYMBOLS = [
-    "BTCUSDT", "ETHUSDT", "QNTUSDT",
-    "LTCBTC", "EGLDUSDT", "ONTUSDT"
-]
 
 dark_template = {
     "layout": {
@@ -35,16 +30,6 @@ dark_template = {
     }
 }
 
-
-
-
-# ------------------ Portfolio overviews -----------------------------
-
-def prisk(totalInitialMargin, totalWalletBalance, totalMaintMargin, totalUnrealizedProfit):
-    leverage_ratio = round((totalInitialMargin / totalWalletBalance) * 100, 2) if totalWalletBalance != 0 else 0
-    maint_margin_ratio = round((totalMaintMargin / totalWalletBalance) * 100, 2) if totalWalletBalance != 0 else 0
-    risk_reward_ratio = round((totalUnrealizedProfit / totalInitialMargin) * 100, 2) if totalInitialMargin != 0 else 0
-    return {"leverage_ratio" : leverage_ratio, "maint_margin_ratio" : maint_margin_ratio, "risk_reward_ratio" : risk_reward_ratio}
 
 
 def waterfall(totalWalletBalance, totalInitialMargin, totalUnrealizedProfit, availableBalance):
@@ -89,109 +74,18 @@ def waterfall(totalWalletBalance, totalInitialMargin, totalUnrealizedProfit, ava
     return waterfall_fig
 
 
-def portfolio_overviews(portfolio_data : dict):
-    totalWalletBalance = float(portfolio_data['totalWalletBalance'])
-    totalInitialMargin = float(portfolio_data['totalInitialMargin'])
-    totalMaintMargin = float(portfolio_data['totalMaintMargin'])
-    totalUnrealizedProfit = float(portfolio_data['totalUnrealizedProfit'])
-    totalMarginBalance = float(portfolio_data['totalMarginBalance'])
-    availableBalance = float(portfolio_data['availableBalance'])
-    maxWithdrawAmount = float(portfolio_data['maxWithdrawAmount'])
-    
-    r_risk = prisk(totalInitialMargin, totalWalletBalance, totalMaintMargin, totalUnrealizedProfit)
-    waterfall_fig = waterfall(totalWalletBalance, totalInitialMargin, totalUnrealizedProfit, availableBalance)
-    return r_risk, waterfall_fig
-    
-
-
-
-
-# ----------------------- Positions -----------------------------
-
-def update_position_state(symbol : str, positions_data : dict, open_orders_data : dict, get_price, ohlc_data):
-    positions = []
-    total_portfolio_value = 0  # Initialiser la valeur totale du portefeuille
-
-    for pos in positions_data:
-        if float(pos['positionAmt']) != 0:
-            symbol = pos['symbol']
-            current_price_data = get_price(symbol)
-            current_price = float(current_price_data['price']) if 'price' in current_price_data else None
-            position_amt = float(pos['positionAmt'])
-            entry_price = float(pos['entryPrice'])
-            unrealized_profit = float(pos['unRealizedProfit'])
-            leverage = float(pos['leverage'])
-                
-            # Récupérer les ordres ouverts pour le symbole actuel
-            stop_loss, take_profit = None, None
-            for order in open_orders_data:
-                if order['symbol'] == symbol:
-                    if order['type'] == 'STOP_MARKET':
-                        stop_loss = float(order['stopPrice'])
-                    elif order['type'] == 'TAKE_PROFIT_MARKET':
-                        take_profit = float(order['stopPrice'])
-
-            # Calcul des nouvelles colonnes
-            position_type = 'LONG' if position_amt > 0 else 'SHORT'
-            roi = (unrealized_profit / (entry_price * abs(position_amt))) * leverage * 100 if entry_price != 0 else 0
-            entry_amount = entry_price * abs(position_amt)
-            current_value = current_price * abs(position_amt) if current_price is not None else 0
-                
-            total_portfolio_value += current_value
-                
-            positions.append({
-                'symbol': symbol,
-                'positionAmt': round(position_amt, 2),
-                'entryPrice': round(entry_price, 2),
-                'entryAmount': round(entry_amount, 2),
-                'unrealizedProfit': round(unrealized_profit, 2),
-                'leverage': round(leverage, 2),
-                'currentValue': round(current_value, 2),
-                'breakEvenPrice': round(entry_price, 2),  # Placeholder, update with correct calculation if available
-                'stopLoss': round(stop_loss, 2) if stop_loss is not None else None,
-                'takeProfit': round(take_profit, 2) if take_profit is not None else None,
-                'positionType': position_type,
-                'ROI (%)': round(roi, 2)
-            })
-    
-    fig_ohlc = ohlc(positions, symbol, ohlc_data)        
-    
-    return positions, fig_ohlc
-
-
-
-
-
-
-def ohlc(positions, symbol, ohlc_data):
-    ohlc_fig = go.Figure()
-    if symbol:
-        
-        if ohlc_data:
-            # ------------ Traitement 
-            df_ohlc = pd.DataFrame(ohlc_data, columns=["openTime", "open", "high", "low", "close", "volume", "time", "quoteAssetVol", "nbTrades", "takerBuyVol", "takerBuyQuote", "Ig"])
-            df_ohlc['time'] = df_ohlc['time'].apply(lambda x : pd.to_datetime(x, unit='ms')) 
-            df_ohlc["low"] = df_ohlc["low"].astype(float)
-            df_ohlc["high"] = df_ohlc["high"].astype(float)
-            df_ohlc["open"] = df_ohlc["open"].astype(float)
-            df_ohlc["close"] = df_ohlc["close"].astype(float)
-            
-            ohlc_fig = go.Figure(data=[go.Candlestick(
+def ohlc_fig(symbol, df_ohlc):
+    ohlc_fig = go.Figure(data=[go.Candlestick(
                 x=df_ohlc['time'],
                 open=df_ohlc['open'],
                 high=df_ohlc['high'],
                 low=df_ohlc['low'],
                 close=df_ohlc['close']
             )])
-            # Ajouter des annotations pour les informations sur la position
-            pos = next((p for p in positions if p['symbol'] == symbol), None)
-            if pos:
-                add_annotations(ohlc_fig, df_ohlc['time'], pos)
-            
-            max_time = df_ohlc['time'].max() + pd.Timedelta(hours=8)
-            y_range = [min(df_ohlc["low"]) * 0.99, max(df_ohlc["high"]) * 1.01]
-            ohlc_fig.update_yaxes(range=y_range, showgrid=False)
-            ohlc_fig.update_xaxes(range=[df_ohlc['time'].min(), max_time], rangeslider_visible=False, showgrid=False,
+    max_time = df_ohlc['time'].max() + pd.Timedelta(hours=8)
+    y_range = [min(df_ohlc["low"]) * 0.99, max(df_ohlc["high"]) * 1.01]
+    ohlc_fig.update_yaxes(range=y_range, showgrid=False)
+    ohlc_fig.update_xaxes(range=[df_ohlc['time'].min(), max_time], rangeslider_visible=False, showgrid=False,
                                   rangeselector=dict(
                                       buttons=[
                                           dict(count=30, label="30min", step="minute", stepmode="backward"),
@@ -204,7 +98,7 @@ def ohlc(positions, symbol, ohlc_data):
                                       font=dict(color="blue")
                                   ))
             
-            ohlc_fig.update_layout(
+    ohlc_fig.update_layout(
                 height=600,
                 legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.5),
                 margin={'t': 0, 'b': 0, 'l': 10, 'r': 0},
