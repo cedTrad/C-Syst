@@ -1,0 +1,138 @@
+/* General Styles */
+body {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font-family: 'Arial', sans-serif;
+}
+
+.container-fluid {
+  padding: 2rem;
+}
+
+/* Header */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #f0f0f0;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Text Styling */
+.text-center {
+  text-align: center;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+/* Margin and Padding */
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
+
+/* Card Styles */
+.card {
+  background-color: #333333;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Graph Styling */
+.dcc-graph {
+  background-color: #2e2e2e;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* Dropdown and Input Styling */
+.bg-dark {
+  background-color: #2e2e2e !important;
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+.dcc-dropdown, .dcc-input, .dcc-slider, .dcc-radioitems {
+  background-color: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: #ffffff;
+}
+
+.dcc-slider .rc-slider-track, .dcc-slider .rc-slider-handle {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+/* Button Styling */
+.dcc-button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+/* Table Styling */
+.dash-table {
+  background-color: #2e2e2e;
+  color: #ffffff;
+  border: 1px solid #444;
+  border-radius: 5px;
+}
+
+.dash-table th, .dash-table td {
+  border-color: #444;
+}
+
+/* Miscellaneous */
+.fa-chart-line, .fa-wallet, .fa-hand-holding-usd, .fa-list-alt, .fa-exclamation-circle {
+  margin-right: 10px;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.text-success {
+  color: #28a745;
+}
+
+.text-danger {
+  color: #dc3545;
+}
