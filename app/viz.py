@@ -153,3 +153,82 @@ def add_annotations(ohlc_fig, time_range, pos):
         line=dict(color="orange", width=2, dash="dash")
     ))
 
+
+
+
+
+def generate_flow_chart(wallet_balance, margin_balance, available_balance, 
+                        unrealized_profit, initial_margin, 
+                        open_order_initial_margin, position_initial_margin):
+    """
+    Génère un diagramme de flux interactif pour suivre les variables de portefeuille de futures.
+    
+    :param wallet_balance: Valeur de Wallet Balance
+    :param margin_balance: Valeur de Margin Balance
+    :param available_balance: Valeur de Available Balance
+    :param unrealized_profit: Valeur de Unrealized Profit
+    :param initial_margin: Valeur de Initial Margin
+    :param open_order_initial_margin: Valeur de Open Order Initial Margin
+    :param position_initial_margin: Valeur de Position Initial Margin
+    """
+    
+    labels = [
+        "Wallet Balance", "Margin Balance", "Available Balance", 
+        "Unrealized Profit", "Initial Margin", 
+        "Open Order Initial Margin", "Position Initial Margin"
+    ]
+
+    sources = [
+        0,  # Wallet Balance to Margin Balance
+        1,  # Margin Balance to Available Balance
+        1,  # Margin Balance to Unrealized Profit
+        2,  # Available Balance to Initial Margin
+        3,  # Unrealized Profit to Margin Balance
+        4,  # Initial Margin to Margin Balance
+        4,  # Initial Margin to Open Order Initial Margin
+        4   # Initial Margin to Position Initial Margin
+    ]
+
+    targets = [
+        1,  # Wallet Balance to Margin Balance
+        2,  # Margin Balance to Available Balance
+        3,  # Margin Balance to Unrealized Profit
+        4,  # Available Balance to Initial Margin
+        1,  # Unrealized Profit to Margin Balance
+        1,  # Initial Margin to Margin Balance
+        5,  # Initial Margin to Open Order Initial Margin
+        6   # Initial Margin to Position Initial Margin
+    ]
+
+    values = [
+        wallet_balance,  # Wallet Balance to Margin Balance
+        margin_balance,  # Margin Balance to Available Balance
+        margin_balance,  # Margin Balance to Unrealized Profit
+        available_balance,  # Available Balance to Initial Margin
+        unrealized_profit,  # Unrealized Profit to Margin Balance
+        initial_margin,  # Initial Margin to Margin Balance
+        open_order_initial_margin,  # Initial Margin to Open Order Initial Margin
+        position_initial_margin  # Initial Margin to Position Initial Margin
+    ]
+
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=labels,
+            color="blue"
+        ),
+        link=dict(
+            source=sources,
+            target=targets,
+            value=values,
+            customdata=values,
+            hovertemplate='Value: %{value}<br />Source: %{source.label}<br />Target: %{target.label}<extra></extra>',
+            color="lightblue"
+        )
+    ))
+
+    fig.update_layout(title_text="Flow Chart of Futures Portfolio Variables", font_size=10)
+    return fig
+

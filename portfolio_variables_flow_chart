@@ -1,0 +1,20 @@
+// Portfolio Variables Flow Chart
+digraph {
+	A [label=totalWalletBalance]
+	B [label=totalUnrealizedProfit]
+	C [label=totalMarginBalance]
+	D [label=availableBalance]
+	E [label=initialMargin]
+	F [label=maintMargin]
+	G [label=positionInitialMargin]
+	H [label=openOrderInitialMargin]
+	I [label=maxWithdrawAmount]
+	A -> C [label=sum]
+	B -> C [label=sum]
+	C -> D [label=subtract]
+	E -> D [label=subtract]
+	F -> D [label=subtract]
+	G -> E [label=sum]
+	H -> E [label=sum]
+	D -> I [label=value]
+}

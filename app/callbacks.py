@@ -11,6 +11,7 @@ from app.viz import ohlc_fig
 
 overview = Overview()
 
+
 class CallBack:
     
     def __init__(self):
@@ -31,6 +32,8 @@ class CallBack:
                 html.P(f"Risk-Reward Ratio = {self.overview.risk_indicator['risk_reward_ratio']}%"),
             ], style={"color": "#ffffff"})
             return self.overview.waterfall_fig, risk_indicators
+        
+
         
         # Update Position
         @app.callback(

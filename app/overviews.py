@@ -1,6 +1,6 @@
 import pandas as pd
 from app.api.account import Account
-from app.viz import ohlc_fig, waterfall
+from app.viz import ohlc_fig, waterfall, generate_flow_chart
 
 
 class Overview:
@@ -16,8 +16,8 @@ class Overview:
         for col in ['open', 'high', 'low', 'close', 'volume']:
             df[col] = df[col].astype(float)
         return df
-        
-    
+
+
     def actuator_position(self):
         self.positions_data = self.account.get_positions()
         self.positions = self.process_positions()
@@ -41,10 +41,15 @@ class Overview:
         totalMarginBalance = float(self.wallets_data['totalMarginBalance'])
         availableBalance = float(self.wallets_data['availableBalance'])
         maxWithdrawAmount = float(self.wallets_data['maxWithdrawAmount'])
+        totalPositionInitialMargin = float(self.wallets_data['totalPositionInitialMargin'])
+        totalOrderInitialMargin = float(self.wallets_data['totalOpenOrderInitialMargin'])
+        
+        flow_fig = generate_flow_chart(totalWalletBalance, totalInitialMargin, availableBalance, totalUnrealizedProfit,
+                            totalInitialMargin, totalOrderInitialMargin, totalPositionInitialMargin)
         
         r_risk = self.prisk(totalInitialMargin, totalWalletBalance, totalMaintMargin, totalUnrealizedProfit)
         waterfall_fig = waterfall(totalWalletBalance, totalInitialMargin, totalUnrealizedProfit, availableBalance)
-        return r_risk, waterfall_fig
+        return r_risk, waterfall_fig, flow_fig
     
     
     def process_positions(self):

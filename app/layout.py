@@ -10,6 +10,14 @@ def create_layout():
             dbc.Col(html.H1("Binance Futures Trading Dashboard", style={"text-align": "center", "margin-top": "20px", "color": "#ffffff"}), width=12)
         ], style={"background-color": "#000000"}),
         
+        
+        dbc.Row([
+            dbc.Col([
+                html.H3("Risk Indicators", style={"margin-top": "20px", "color": "#3498db"}),
+                html.Div(id='risk-indicators')
+            ], width=12)
+        ], style={"background-color": "#1a1a1a"}),
+        
         # Wallet Overviews and Risk Indicators in the same row
         dbc.Row([
             dbc.Col([
@@ -18,8 +26,7 @@ def create_layout():
                 dcc.Graph(id='waterfall-graph', config={'displayModeBar': False}),
             ], width=6),
             dbc.Col([
-                html.H3("Risk Indicators", style={"margin-top": "20px", "color": "#3498db"}),
-                html.Div(id='risk-indicators')
+                dcc.Graph(id='portfolio_flux-graph', config={'displayModeBar': False})
             ], width=6)
         ], style={"background-color": "#1a1a1a"}),
         
