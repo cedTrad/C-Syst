@@ -1,7 +1,7 @@
 
 # ----- ------------------
 
-from .decision.signal import Signal
+from .decision.signal import Signal, MLSignal
 from .decision.risk_manager import RiskManager
 from .decision.transition import Transition
 
@@ -17,6 +17,7 @@ class Politic:
         """
         self.init_capital = capital
         self.signal = Signal()
+        self.ml_signal = MLSignal()
         self.riskmanager = RiskManager(capital)
         self.policy_name = None
         self.signal_params = {}
@@ -94,7 +95,8 @@ class Politic:
         
         price = batchData.iloc[-1]["close"]
         signal = self.signal.processing(batchData=batchData, policy_name=self.policy_name, params=self.signal_params)
-        #signal = self.signal_processing(batchData)
+        
+        signal = self.ml_signal.processing(batchData=batchData)
         
         sl = False
         tp = False
