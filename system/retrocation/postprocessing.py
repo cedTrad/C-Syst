@@ -7,11 +7,12 @@ class APostprocessing:
     
     
     def add_trade_features(self, trade):
+        trade["status"] = trade["state"].apply(lambda x : ast.literal_eval(x)[0])
+        
         trade['gp'] = np.where(trade["state"].apply(lambda x : ast.literal_eval(x)[1]), trade['pnl'].diff(), 0)
         trade["gp"] = np.where(trade["status"] == "Open", 0, trade["gp"])
         trade["cum_gp"] = trade["gp"].cumsum()
-
-        trade['ret_price'] = trade['price'].pct_change()
+        
         trade['cum_price'] = (trade['ret_price'] + 1).cumprod()
         
         
@@ -22,7 +23,6 @@ class APostprocessing:
     
     def transform(self, trade):
         #trade.set_index('date', inplace = True)
-        trade["status"] = trade["state"].apply(lambda x : ast.literal_eval(x)[0])
         
         self.add_trade_features(trade)
         self.recovery_per_trade(trade)

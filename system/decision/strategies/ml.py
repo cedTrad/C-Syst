@@ -15,7 +15,7 @@ class ML:
         self.data.columns = [str(col) if isinstance(col, sqlalchemy.sql.elements.quoted_name) else col for col in self.data.columns]
         self.data['volatility'] = compute_daily_volatility(self.data['close'])
         pipe = get_pipeline()
-        self.data = pipe.fit_transform(self.data)
+        pipe.fit_transform(self.data)
         
         
     def run(self, bar=-1):
@@ -24,5 +24,4 @@ class ML:
         x = self.data.iloc[bar].values.reshape([1, -1])
         side = model.predict(x)[0]
         proba = model.predict_proba(x)[:,1][0]
-        
         return side, proba

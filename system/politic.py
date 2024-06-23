@@ -43,6 +43,7 @@ class Politic:
         """
         self.signal_params = params
 
+
     def update_risk_params(self, session_params: dict = {"floor": 0.2}):
         """
         Update the parameters for the risk manager after end of each session.
@@ -53,7 +54,7 @@ class Politic:
         self.session_params = session_params
 
 
-    def risk_policy(self, portfolio, current_status):
+    def risk_policy(self, portfolio, current_status, signal_proba = None):
         """
         Determine the risk policy based on the portfolio and current status.
         
@@ -71,6 +72,16 @@ class Politic:
         self.riskmanager.actuator(current_capital)
         
         leverage = 1
+        if signal_proba:
+            if signal_proba > 0.8:
+                leverage = 10
+            elif signal_proba > 0.9:
+                leverage = 20
+            elif signal_proba < 0.2:
+                leverage = 10
+            elif signal_proba < 0.1:
+                leverage = 20
+        
         amount = available_amount
         return amount, leverage
     
@@ -94,10 +105,9 @@ class Politic:
         riskAction = {}
         
         price = batchData.iloc[-1]["close"]
-        signal = self.signal.processing(batchData=batchData, policy_name=self.policy_name, params=self.signal_params)
+        #signal, signal_proba = self.signal.processing(batchData=batchData, policy_name=self.policy_name, params=self.signal_params)
         
-        signal = self.ml_signal.processing(batchData=batchData)
-        
+        signal, signal_proba = self.ml_signal.processing(batchData=batchData)
         sl = False
         tp = False
         
@@ -111,9 +121,9 @@ class Politic:
         if canCloseSession:
             signalAction["state"] = sessionOut + (sl, tp)
         
-        if canOpenPosition:
+        elif canOpenPosition:
             signalAction["state"] = sideIn + (sl, tp)
-            amount, leverage = self.risk_policy(portfolio, current_status="Open")
+            amount, leverage = self.risk_policy(portfolio, current_status="Open", signal_proba=signal_proba)
             quantity = amount / price
             riskAction.update({"amount": amount, "quantity": quantity, "leverage": leverage})
         

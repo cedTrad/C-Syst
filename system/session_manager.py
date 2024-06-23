@@ -1,15 +1,12 @@
 from .retrocation.metrics import AMetric
 
-"""
-SessionManager fonctionne avec following
-"""
+
 class SessionManager:
     
-    def __init__(self, env, following, max_step):
-        self.following = following
+    def __init__(self, env, max_step):
         self.post_event = env.post_event
         self.max_step = max_step
-        self.step = 50
+        self.step = max_step
         self.session_id = 0
         self.metrics = AMetric()        
         self.rets_dist = {}
@@ -27,7 +24,7 @@ class SessionManager:
     
     
     def actuator(self):
-        if self.step == 0:
+        if self.step == 0:  # end of current session
             session_metric = self.get_session_metrics()
             self.post_event.add_session(session_metric)
             
@@ -38,13 +35,12 @@ class SessionManager:
             
             self.update_step()
             self.metrics.reset()
-            print(f"__ End Session {self.session_id} ____________")
+            print(f"__ Close Session {self.session_id} ____________")
             return True, self.session_id
             
-        if self.step == self.max_step :
+        elif self.step == self.max_step :
             self.session_id += 1
-            
-            print(f"__ Start Session {self.session_id}____________")
+            print(f"__ Start Session {self.session_id} ____________")
         
             
         self.step -= 1

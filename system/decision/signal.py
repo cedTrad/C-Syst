@@ -23,7 +23,7 @@ class Signal:
         rule = self.rules.get(policy_name, None)
         rule.update_params(params)
         signal = rule.run()
-        return signal
+        return signal, None
     
 
 class MLSignal:
@@ -45,5 +45,5 @@ class MLSignal:
         side, proba = self.ml.run()
         
         fside = self.rules(proba)
-        return fside
+        return fside, proba
     

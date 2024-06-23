@@ -12,7 +12,7 @@ class GEnv:
     Classe représentant un environnement global pour plusieurs symboles.
     """
 
-    def __init__(self, symbols, interval="1d", start="2023", end="2023"):
+    def __init__(self, symbols, interval, start, end):
         """
         Initialise l'environnement global.
 
@@ -25,7 +25,7 @@ class GEnv:
         self.start = start
         self.end = end
         self.post_event = PostEvent()
-        self.market = MarketEvent(size=50, start=start, end=end, interval=interval)
+        self.market = MarketEvent(size=30, start=start, end=end, interval=interval)
         self.metrics = {}
 
     def initialize_portfolio(self, capital):
