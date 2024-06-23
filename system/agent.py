@@ -1,6 +1,6 @@
 from .politic import Politic
 from .portfolio_manager import Asset, Portfolio
-from .following import Following
+from .processor import Processor
 from .session_manager import SessionManager
 from IPython.display import clear_output
 
@@ -41,8 +41,8 @@ class Agent:
 
         self.asset = Asset(self.symbol)
         self.policy = Politic(capital=capital)
-        self.following = Following(db=self.env.market.db, post_event=self.env.post_event)
-        self.session = SessionManager(self.env, self.following, session_step)
+        self.processor = Processor(agentId=agentId, db=self.env.market.db, post_event=self.env.post_event)
+        self.session = SessionManager(self.env, session_step)
 
     def get_event(self):
         """
@@ -88,20 +88,18 @@ class Agent:
         event = self.get_event()
         closeSession, n_session = self.session.actuator()
         signalAction, riskAction = self.act(state, session_state=closeSession)
-
         if "leverage" in riskAction:
-            self.asset.set_leverage(riskAction["leverage"])
-
+            self.asset.set_leverage(riskAction["leverage"])    
         next_state, reward = self.env.step(self.agentId[0], self.asset, event, signalAction, riskAction, n_session, paper_mode)
-
+        
         # Après l'exécution
         if signalAction["state"][1] in ["LONG", "SHORT"]:
-            self.following.execute(self.agentId)
-            tradedata = self.following.tradeData
+            tradedata = self.post_event.tradeData
             self.session.metrics.actuator(tradedata)
-
+                
         return event, next_state, reward, signalAction, riskAction
-
+    
+    
     def run_episode(self):
         """
         Exécute une session complète de trading.
@@ -113,19 +111,19 @@ class Agent:
                 event, next_state, reward, signalAction, riskAction = self.execute(state)
                 state = next_state
                 i += 1
-
+                
             except StopIteration:
                 print(f"Session terminée après {i} itérations.")
+                self.processor.run()
                 break
 
     def view_report(self):
         """
         Affiche le rapport de performance.
         """
-        self.following.plot_equity()
-        
-        # viz sessions
-        self.following.plot_session(self.session.rets_dist)
+        self.processor.plot_equity()
+        self.processor.plot_session(self.session.rets_dist)
+
 
     def learn(self):
         """
@@ -139,7 +137,7 @@ class Agent:
         portfolioData = self.post_event.portfolioData.copy()
         sessionData = self.post_event.sessionData.copy()
         init_capital = self.env.init_capital
-        agent_capital = init_capital + tradeData.iloc[-1]["cum_gp"] 
+        agent_capital = init_capital + tradeData.iloc[-1]["cum_gp"]
         port_capital = portfolioData.iloc[-1]["capital"]
         pnl = tradeData.iloc[-1]["cum_gp"]
 
@@ -153,4 +151,3 @@ class Agent:
         max_expo = sessionData["maxExposure"].max()
         print(f"Min exposure : {min_expo}  Max exposure : {max_expo}")
         
-        display(sessionData[["date", "nbTrades", "winRate", "lossRate", "profitFactor"]])

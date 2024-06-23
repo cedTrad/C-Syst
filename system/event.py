@@ -7,7 +7,7 @@ class MarketEvent:
     Classe pour générer des événements de marché en fonction des données historiques.
     """
 
-    def __init__(self, size=45, start="2023", end="2023", interval="1d"):
+    def __init__(self, size, start, end, interval):
         """
         Initialise un événement de marché.
 
@@ -82,6 +82,7 @@ class PostEvent:
         }
         add = pd.DataFrame([line], index=[date])
         self.tradeData = pd.concat([self.tradeData, add], ignore_index=True)
+        self.tradeData['ret_price'] = self.tradeData['price'].pct_change()
 
     def add_portfolio_line(self, agent_id, date, symbol, portfolio, session_id):
         """
@@ -100,7 +101,7 @@ class PostEvent:
         }
         add = pd.DataFrame([line], index=[date])
         self.portfolioData = pd.concat([self.portfolioData, add], ignore_index=True)
-
+        
     def add_metrics_line(self, date, line):
         """
         Ajoute une ligne de métriques à la DataFrame des métriques.

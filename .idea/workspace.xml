@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="a8a1478b-1804-431a-b84c-fc5872659fb8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Binance.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/callbacks.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/callbacks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/db_utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/overviews.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/overviews.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/viz.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/viz.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/trading_app.log" beforeDir="false" afterPath="$PROJECT_DIR$/trading_app.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/labs.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/decision/signal.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/decision/signal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/decision/strategies/ml.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/decision/strategies/ml.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/decision/strategies/model.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/system/decision/strategies/model.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/decision/transition.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/decision/transition.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/event.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/event.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/following.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/politic.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/politic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/retrocation/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/retrocation/metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/retrocation/postprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/retrocation/postprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/retrocation/processor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/system/session_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/system/session_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,22 +29,27 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2hhrBMNWgxUx6OW4Wpyr7bmUeBu" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "viz__postion",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;StrategyML&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -52,10 +67,37 @@
       <option name="presentableId" value="Default" />
       <updated>1718057015865</updated>
       <workItem from="1718057017194" duration="68000" />
+      <workItem from="1718976432925" duration="7249000" />
+      <workItem from="1719071789258" duration="241000" />
+      <workItem from="1719091602675" duration="971000" />
+      <workItem from="1719094696747" duration="719000" />
+      <workItem from="1719125329822" duration="659000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
+          <url>notebook://C:/Users/Dell/Desktop/CedAlgo/C-Syst/labs.ipynb</url>
+          <line>10</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

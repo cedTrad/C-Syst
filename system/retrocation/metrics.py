@@ -3,6 +3,7 @@ import numpy as np
 import ast
 import scipy.stats
 
+import  scipy
 from dataclasses import dataclass, field
 from typing import List
 
@@ -11,18 +12,24 @@ from typing import List
 class WTO:
     nb: List[int] = field(default_factory=list)
     amount: List[float] = field(default_factory=list)
-    rets : List[float] = field(default_factory=list)
-    mkt_rets : List[float] = field(default_factory=list)
-    exposure : List[float] = field(default_factory=list)
+    rets: List[float] = field(default_factory=list)
+    mkt_rets: List[float] = field(default_factory=list)
+    exposure: List[float] = field(default_factory=list)
     
     def nbtrades(self):
         return len(self.nb)
     
     def winrate(self):
-        return sum([x for x in self.nb if x > 0])/len(self.nb)
+        if len(self.nb) != 0:
+            return sum([x for x in self.nb if x > 0])/len(self.nb)
+        else:
+            return 0
     
     def lossrate(self):
-        return sum([x for x in self.nb if x <= 0])/len(self.nb)
+        if len(self.nb) != 0:
+            return sum([x for x in self.nb if x <= 0])/len(self.nb)
+        else:
+            return 0
     
     def total_amount(self):
         return sum(self.amount)
@@ -49,13 +56,22 @@ class WTO:
         return self.winrate() * self.avgwin() - self.lossrate() * self.avgloss()
     
     def profitfactor(self):
-        return self.totalwin() / self.totalloss() * (-1)
+        if self.totalloss() != 0:
+            return self.totalwin() / self.totalloss() * (-1)
+        else:
+            return 0
     
     def minexp(self):
-        return min(self.exposure)
+        if (self.exposure):
+            return min(self.exposure)
+        else:
+            return 0
     
     def maxexp(self):
-        return max(self.exposure)
+        if (self.exposure):
+            return max(self.exposure)
+        else:
+            return 0
 
 
 class AMetric:
@@ -99,8 +115,8 @@ class AMetric:
         pnl_pct = tradeData.iloc[-1]["pnl_pct"]
         mkt_pct = tradeData.iloc[-1]["ret_price"]
         
-        self.cum_gp = tradeData.iloc[-1]["cum_gp"]
-        status = tradeData.iloc[-1]["status"]
+        state = tradeData.iloc[-1]["state"]
+        status = ast.literal_eval(state)[0]
         current_position = tradeData.iloc[-1]["position"]
         
         position = tradeData["state"].apply(lambda x : ast.literal_eval(x)[1]).iloc[-1]
@@ -109,7 +125,6 @@ class AMetric:
         
         if status == "Open":
             self.nb_trades += 1
-            self.len_trade += 1
             
         elif status == "Close":
             self.len_trade += 1
@@ -117,9 +132,11 @@ class AMetric:
             self.len_trade = 0
             
             self.wto.nb.append(1) if pnl > 0 else self.wto.nb.append(-1)
-            
             self.wto.amount.append(pnl)
             self.wto.rets.append(pnl_pct)
+        
+        else:
+            self.len_trade += 1
             
     
     def calculate(self):
@@ -129,11 +146,11 @@ class AMetric:
         amountWin = self.wto.totalwin()
         amountLoss = self.wto.totalloss()
         totalAmount = self.wto.total_amount()
-        expectancy = self.wto.expectancy()
+        #expectancy = self.wto.expectancy()
         profitFactor = self.wto.profitfactor()
         minExposure = self.wto.minexp()
         maxExposure = self.wto.maxexp()
-        distribution = self.wto.distribution()
+        #distribution = self.wto.distribution()
         result = {
             "date" : self.date,
             "nbTrades" : nbTrades,
@@ -141,13 +158,10 @@ class AMetric:
             "lossRate": lossRate,
             "amountWin": amountWin,
             "amountLoss": amountLoss,
-            "totalAmount" : totalAmount,
-            "amount" : self.cum_gp,
-            "expectancy": expectancy,
+            "sessionAmount" : totalAmount,
             "profitFactor": profitFactor,
             "minExposure" : minExposure,
-            "maxExposure" : maxExposure,
-            "q1 avg median q3 %" : distribution
+            "maxExposure" : maxExposure
         }
         
         return result

@@ -1,5 +1,4 @@
-from .report import Report
-from .retrocation.processor import Processor
+from .retrocation.postprocessing import APostprocessing, PPostprocessing
 from .viz import Benchmark, Session
 
 
@@ -12,11 +11,13 @@ class AgentData:
         self.metric_data = metric_data
 
 
-class Following:
+class Processor:
     
-    def __init__(self, db, post_event):
+    def __init__(self, agentId, db, post_event):
+        self.agentId = agentId
         self.db = db
-        self.processor = Processor()
+        self.processAsset = APostprocessing()
+        self.processPort = PPostprocessing()
         self.post_event = post_event
         
         
@@ -36,19 +37,21 @@ class Following:
         self.portfolioData = self.post_event.portfolioData
         self.metricData = self.post_event.metricData
         
-        self.processor.transform(self.tradeData, self.portfolioData)
+        self.processAsset.transform(self.tradeData)
+        self.processPort.transform(self.portfolioData)
+        
         self.agent_data = AgentData(agentId, self.tradeData, self.portfolioData, self.metricData)
         
     
     def show(self):
-        f_var = ["pnl", "pnl_pct", "value"]
+        f_var = ["date", "pnl", "pnl_pct", "value"]
         p_var = ["capital", "risk_value"]
         print(self.tradeData.iloc[-1][f_var])
-        print(self.portfolioData.iloc[-1][p_var])
+        #print(self.portfolioData.iloc[-1][p_var])
     
     
-    def execute(self, agentId):
-        self.process_agent_data(agentId)
+    def run(self):
+        self.process_agent_data(self.agentId)
         #self.show()
     
     
